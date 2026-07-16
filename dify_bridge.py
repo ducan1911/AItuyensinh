@@ -42,13 +42,23 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-DIFY_BASE_URL = os.environ["DIFY_BASE_URL"].rstrip("/")
-DIFY_API_KEY = os.environ["DIFY_API_KEY"]
-GEMINI_API_KEY = os.environ["GEMINI_API_KEY"]
+DIFY_BASE_URL = os.environ.get("DIFY_BASE_URL", "").rstrip("/")
+DIFY_API_KEY = os.environ.get("DIFY_API_KEY", "")
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash-lite")
-SUPABASE_URL = os.environ["SUPABASE_URL"].rstrip("/")
-SUPABASE_SERVICE_ROLE_KEY = os.environ["SUPABASE_SERVICE_ROLE_KEY"]
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "").rstrip("/")
+SUPABASE_SERVICE_ROLE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
 DEVICE_ID = os.environ.get("DEVICE_ID", "kiosk-01")
+
+_missing = [k for k, v in {
+    "DIFY_BASE_URL": DIFY_BASE_URL,
+    "DIFY_API_KEY": DIFY_API_KEY,
+    "GEMINI_API_KEY": GEMINI_API_KEY,
+    "SUPABASE_URL": SUPABASE_URL,
+    "SUPABASE_SERVICE_ROLE_KEY": SUPABASE_SERVICE_ROLE_KEY,
+}.items() if not v]
+if _missing:
+    logging.warning("MISSING ENV VARS: %s — app will start but these features won't work!", _missing)
 
 CATEGORIES = [
     "Quản trị Cơ sở dữ liệu",
