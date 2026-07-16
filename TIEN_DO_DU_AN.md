@@ -100,20 +100,17 @@ OUT (jack 3.5mm)       Cap AUX → loa    Noi vao cong AUX IN cua loa Bluetooth
 - [x] Tao GitHub repo: https://github.com/ducan1911/AItuyensinh
 - [x] Push code len GitHub (da co .gitignore bao ve .env)
 - [x] Tao `requirements.txt` (flask, requests, python-dotenv, gunicorn)
-- [x] Tao `Procfile` (gunicorn dify_bridge:app)
-- [x] Tao `railway.toml` (start command)
-- [x] Cap nhat `dify_bridge.py` — dung os.environ.get() thay os.environ[] de tranh crash khi thieu env vars
-- [x] Cap nhat `dify_bridge.py` — doc PORT tu env (Railway gan port dong)
-- [x] Deploy `dify_bridge.py` len Railway — **DA THANH CONG**
-- [x] Cau hinh env vars tren Railway dashboard
+- [x] Tao `Procfile` (cho Railway/Heroku) va `render.yaml` (cho Render)
+- [x] Cap nhat `dify_bridge.py` — dung os.environ.get() de chong crash, ho tro port dong
+- [x] Chuyen tu Railway (tra phi sau 30 ngay) sang Render (mien phi vinh vien)
+- [x] Deploy `dify_bridge.py` len Render — **DA THANH CONG**
+- [x] Cau hinh env vars tren Render
 - [x] Test API tren cloud — Dify tra loi OK, Gemini phan loai OK
-- **URL API:** `https://web-production-11e6b.up.railway.app/v1/chat/completions`
-- **Health check:** `https://web-production-11e6b.up.railway.app/health`
+- **URL API:** `(Dang cap nhat URL cua Render)`
 
 ### 4. Phan mem - Chua lam
-- [ ] Deploy `dify_bridge.py` len Railway — ~~DA XONG (xem muc 3)~~
 - [ ] Cai dat va build firmware Xiaozhi len ESP32-S3
-- [ ] Cau hinh Xiaozhi tro den URL: `https://web-production-11e6b.up.railway.app/v1`
+- [ ] Cau hinh Xiaozhi tro den URL cua Render
 - [ ] Test end-to-end: noi vao mic → nghe tra loi qua loa → thay du lieu tren dashboard
 - [ ] Ket noi loa Bluetooth qua PCM5102 + cap AUX 3.5mm
 
@@ -121,15 +118,14 @@ OUT (jack 3.5mm)       Cap AUX → loa    Noi vao cong AUX IN cua loa Bluetooth
 
 ## BUOC TIEP THEO (THU TU UU TIEN)
 
-### A. Khong can PCM5102 — ~~lam ngay duoc~~ DA XONG:
-1. ~~**Deploy `dify_bridge.py` len Railway:**~~ — **DA XONG 16/07/2026**
-   - ~~Tao `requirements.txt` (flask, requests, python-dotenv)~~ ✅
-   - ~~Tao tai khoan Railway.app → New Project → deploy tu GitHub hoac CLI~~ ✅
-   - ~~Them env vars tu file `.env` vao Railway dashboard~~ ✅
-   - URL: `https://web-production-11e6b.up.railway.app`
+### A. Khong can PCM5102 — DA XONG:
+1. **Deploy `dify_bridge.py` len Render (Mien phi):** — **DA XONG 16/07/2026**
+   - Tao `render.yaml` de tu dong hoa deploy
+   - Them env vars vao Render dashboard
+   - URL: `(Dang cap nhat URL cua Render)`
 
-2. ~~**Test dify_bridge tren cloud:**~~ — **DA XONG 16/07/2026**
-   - ~~Gui curl test~~ ✅ — Dify tra loi dung tu knowledge base
+2. **Test dify_bridge tren cloud:** — **DA XONG 16/07/2026**
+   - Gui curl test — Dify tra loi dung tu knowledge base
    - ~~Kiem tra API endpoint hoat dong~~ ✅ — Health check OK
 
 ### B. Can PCM5102 — lam khi co linh kien:
