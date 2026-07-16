@@ -106,7 +106,7 @@ OUT (jack 3.5mm)       Cap AUX → loa    Noi vao cong AUX IN cua loa Bluetooth
 - [x] Deploy `dify_bridge.py` len Render — **DA THANH CONG**
 - [x] Cau hinh env vars tren Render
 - [x] Test API tren cloud — Dify tra loi OK, Gemini phan loai OK
-- **URL API:** `(Dang cap nhat URL cua Render)`
+- **URL API:** `https://aituyensinh-bridge.onrender.com/v1/chat/completions`
 
 ### 4. Phan mem - Chua lam
 - [ ] Cai dat va build firmware Xiaozhi len ESP32-S3
@@ -122,11 +122,11 @@ OUT (jack 3.5mm)       Cap AUX → loa    Noi vao cong AUX IN cua loa Bluetooth
 1. **Deploy `dify_bridge.py` len Render (Mien phi):** — **DA XONG 16/07/2026**
    - Tao `render.yaml` de tu dong hoa deploy
    - Them env vars vao Render dashboard
-   - URL: `(Dang cap nhat URL cua Render)`
+   - URL: `https://aituyensinh-bridge.onrender.com`
 
 2. **Test dify_bridge tren cloud:** — **DA XONG 16/07/2026**
    - Gui curl test — Dify tra loi dung tu knowledge base
-   - ~~Kiem tra API endpoint hoat dong~~ ✅ — Health check OK
+   - Kiem tra API endpoint hoat dong — Health check OK
 
 ### B. Can PCM5102 — lam khi co linh kien:
 3. **Dau noi PCM5102 theo so do o tren**
@@ -136,7 +136,7 @@ OUT (jack 3.5mm)       Cap AUX → loa    Noi vao cong AUX IN cua loa Bluetooth
    - Sua `config.h` de khop voi so do chan thuc te (MIC: 16/17/18, SPK: 7/15/14, BTN: 47)
    - Build va flash len ESP32-S3
 5. **Cau hinh Xiaozhi:**
-   - LLM Base URL: `https://web-production-11e6b.up.railway.app/v1`
+   - LLM Base URL: `https://aituyensinh-bridge.onrender.com/v1`
    - WiFi SSID/password cua buoi tu van
 6. **Test end-to-end**
 
