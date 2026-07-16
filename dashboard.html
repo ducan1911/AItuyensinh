@@ -712,6 +712,38 @@
     .nc-salary { font-size: 14px; color: var(--amber); font-weight: 800; margin-bottom: 6px; }
     .nc-desc { font-size: 13px; color: var(--text-muted); line-height: 1.45; font-weight: 500; }
 
+    /* ===== QR CODE ===== */
+    .qr-box {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      box-shadow: var(--shadow);
+    }
+    .qr-box img {
+      width: 80px;
+      height: 80px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+    }
+    .qr-text {
+      flex: 1;
+    }
+    .qr-text h3 {
+      font-weight: 800;
+      font-size: 14px;
+      color: var(--text-main);
+      margin-bottom: 4px;
+    }
+    .qr-text p {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
     /* ===== FOOTER ===== */
     footer {
       display: flex;
@@ -744,41 +776,41 @@
           <img src="https://tcktktct.edu.vn/assets_site/images/logo.webp" alt="Logo Truong TC KTKT Can Tho">
         </div>
         <div>
-          <div class="nav-title">AI Tuyen Sinh Kiosk</div>
-          <div class="nav-school">Truong TC Kinh te - Ky thuat TP. Can Tho</div>
+          <div class="nav-title">AI Tuyển Sinh Kiosk</div>
+          <div class="nav-school">Trường TC Kinh tế - Kỹ thuật TP. Cần Thơ</div>
         </div>
       </div>
       <div class="nav-right">
-        <div class="nav-badge"><span class="pulse-dot"></span> TRUC TIEP</div>
+        <div class="nav-badge"><span class="pulse-dot"></span> TRỰC TIẾP</div>
         <div class="conn-status" id="connStatus">
           <span class="conn-led"></span>
-          <span id="connText">Dang ket noi...</span>
+          <span id="connText">Đang kết nối...</span>
         </div>
       </div>
     </nav>
 
     <!-- HERO -->
     <div class="hero">
-      <h1>Hoc sinh dang hoi gi?</h1>
-      <p>Moi cau hoi qua kiosk AI duoc ghi nhan, phan loai theo nganh va hien thi tren dashboard nay ngay lap tuc. Day chinh la suc manh cua Quan tri Co so du lieu!</p>
+      <h1>Học sinh đang hỏi gì?</h1>
+      <p>Mọi câu hỏi qua Kiosk AI được ghi nhận, phân loại theo ngành và hiển thị trên dashboard này ngay lập tức. Đây chính là sức mạnh của ngành Quản trị Cơ sở dữ liệu!</p>
     </div>
 
     <!-- STATS -->
     <div class="stats">
       <div class="stat">
-        <div class="label">Tong so cau hoi</div>
+        <div class="label">Tổng số câu hỏi</div>
         <div class="value" id="statTotal">0</div>
       </div>
       <div class="stat">
-        <div class="label">Nganh dan dau</div>
+        <div class="label">Ngành dẫn đầu</div>
         <div class="value" id="statTop" style="font-size:18px;">—</div>
       </div>
       <div class="stat">
-        <div class="label">15 phut gan day</div>
-        <div class="value" id="statRecent">0<small>cau hoi</small></div>
+        <div class="label">15 phút gần đây</div>
+        <div class="value" id="statRecent">0<small>câu hỏi</small></div>
       </div>
       <div class="stat">
-        <div class="label">So nganh co nguoi hoi</div>
+        <div class="label">Số ngành có người hỏi</div>
         <div class="value" id="statCats">0</div>
       </div>
     </div>
@@ -787,7 +819,7 @@
     <div class="main-grid">
       <div class="card">
         <div class="card-header">
-          <h2>Muc do quan tam theo nganh</h2>
+          <h2>Mức độ quan tâm theo ngành</h2>
           <span class="badge">Realtime</span>
         </div>
         <div id="chartHolder"><canvas id="chart"></canvas></div>
@@ -795,58 +827,58 @@
 
       <div class="card">
         <div class="card-header">
-          <h2>Bang xep hang</h2>
+          <h2>Bảng xếp hạng</h2>
           <span class="badge">Top 6</span>
         </div>
         <div class="rank-list" id="rankList">
-          <div class="empty">Dang cho du lieu...</div>
+          <div class="empty">Đang chờ dữ liệu...</div>
         </div>
       </div>
 
       <div class="card">
         <div class="card-header">
-          <h2>Hoi & Dap moi nhat</h2>
+          <h2>Hỏi & Đáp mới nhất</h2>
           <span class="badge">Live</span>
         </div>
         <div class="feed" id="feed">
-          <div class="empty">Dang cho cau hoi dau tien...</div>
+          <div class="empty">Đang chờ câu hỏi đầu tiên...</div>
         </div>
       </div>
     </div>
 
     <!-- PIPELINE -->
     <div class="pipeline-card">
-      <div class="section-title">Du lieu chay nhu the nao?</div>
-      <p class="section-sub">Moi cau hoi cua ban di qua 5 buoc xu ly — day chinh la cong viec cua nganh Quan tri Co so du lieu & CNTT</p>
+      <div class="section-title">Dữ liệu chảy như thế nào?</div>
+      <p class="section-sub">Mỗi câu hỏi của bạn đi qua 5 bước xử lý — đây chính là công việc của ngành Quản trị Cơ sở dữ liệu & CNTT</p>
       <div class="pipeline">
         <div class="pipe-step">
           <div class="pipe-icon active">&#127908;</div>
-          <div class="pipe-label">Thu am</div>
-          <div class="pipe-desc">Mic ghi lai giong noi</div>
+          <div class="pipe-label">Thu âm</div>
+          <div class="pipe-desc">Mic ghi lại giọng nói</div>
           <span class="pipe-tech">ESP32-S3</span>
         </div>
         <div class="pipe-step">
           <div class="pipe-icon active">&#128488;</div>
-          <div class="pipe-label">Chuyen thanh chu</div>
-          <div class="pipe-desc">AI nhan dang giong noi (STT)</div>
+          <div class="pipe-label">Chuyển thành chữ</div>
+          <div class="pipe-desc">AI nhận dạng giọng nói (STT)</div>
           <span class="pipe-tech">Xiaozhi Server</span>
         </div>
         <div class="pipe-step">
           <div class="pipe-icon active">&#129302;</div>
-          <div class="pipe-label">AI tra loi</div>
-          <div class="pipe-desc">Tra cuu knowledge base</div>
+          <div class="pipe-label">AI trả lời</div>
+          <div class="pipe-desc">Tra cứu knowledge base</div>
           <span class="pipe-tech">Dify RAG + Gemini</span>
         </div>
         <div class="pipe-step">
           <div class="pipe-icon active">&#128451;</div>
-          <div class="pipe-label">Luu vao CSDL</div>
-          <div class="pipe-desc">Phan loai + ghi database</div>
+          <div class="pipe-label">Lưu vào CSDL</div>
+          <div class="pipe-desc">Phân loại + ghi database</div>
           <span class="pipe-tech">PostgreSQL</span>
         </div>
         <div class="pipe-step">
           <div class="pipe-icon active">&#128202;</div>
-          <div class="pipe-label">Hien thi</div>
-          <div class="pipe-desc">Dashboard cap nhat ngay</div>
+          <div class="pipe-label">Hiển thị</div>
+          <div class="pipe-desc">Dashboard cập nhật ngay</div>
           <span class="pipe-tech">Realtime</span>
         </div>
       </div>
@@ -856,10 +888,10 @@
     <div class="db-grid">
       <div class="card">
         <div class="card-header">
-          <h2>Bang questions (CSDL that)</h2>
+          <h2>Bảng questions (CSDL thật)</h2>
           <span class="badge">PostgreSQL</span>
         </div>
-        <div style="overflow-x:auto; max-height:320px; overflow-y:auto;">
+        <div id="dbTableWrapper" style="overflow-x:auto; max-height:320px; overflow-y:auto; scroll-behavior: smooth;">
           <table class="db-table">
             <thead>
               <tr>
@@ -870,7 +902,7 @@
               </tr>
             </thead>
             <tbody id="dbTableBody">
-              <tr><td colspan="4" style="text-align:center;color:var(--muted)">Dang cho du lieu...</td></tr>
+              <tr><td colspan="4" style="text-align:center;color:var(--muted)">Đang chờ dữ liệu...</td></tr>
             </tbody>
           </table>
         </div>
@@ -878,20 +910,20 @@
 
       <div class="card">
         <div class="card-header">
-          <h2>SQL minh hoa</h2>
+          <h2>SQL minh họa</h2>
           <span class="badge">Live Query</span>
         </div>
-        <div class="sql-box"><span class="cm">-- Dem so cau hoi theo nganh</span>
+        <div class="sql-box"><span class="cm">-- Đếm số câu hỏi theo ngành</span>
 <span class="kw">SELECT</span> category,
        <span class="fn">COUNT</span>(*) <span class="kw">AS</span> so_luot
 <span class="kw">FROM</span> questions
 <span class="kw">GROUP BY</span> category
 <span class="kw">ORDER BY</span> so_luot <span class="kw">DESC</span>;
 
-<span class="cm">-- Ket qua (cap nhat realtime):</span>
+<span class="cm">-- Kết quả (cập nhật realtime):</span>
 <span id="sqlResult" class="str"></span></div>
         <div style="margin-top:14px;">
-          <div class="sql-box"><span class="cm">-- 15 phut gan day</span>
+          <div class="sql-box"><span class="cm">-- 15 phút gần đây</span>
 <span class="kw">SELECT</span> question, category
 <span class="kw">FROM</span> questions
 <span class="kw">WHERE</span> created_at >= <span class="fn">NOW</span>() - <span class="kw">INTERVAL</span> <span class="str">'15 minutes'</span>
@@ -906,31 +938,31 @@
         <!-- QTCSDL -->
         <div class="nganh-hero">
           <div class="nganh-hero-text">
-            <span class="ma-nganh">Ma nganh: 5480208</span>
-            <h2>Quan tri Co so du lieu</h2>
-            <p>Nganh hoc giup ban tro thanh nguoi quan ly, bao mat va phan tich du lieu — "tai san quy gia nhat" cua moi doanh nghiep. Chinh he thong dang chay hien tai la mot vi du ve san pham cua nganh nay!</p>
+            <span class="ma-nganh">Mã ngành: 5480208</span>
+            <h2>Quản trị Cơ sở dữ liệu</h2>
+            <p>Ngành học giúp bạn trở thành người quản lý, bảo mật và phân tích dữ liệu — "tài sản quý giá nhất" của mọi doanh nghiệp. Chính hệ thống đang chạy hiện tại là một ví dụ về sản phẩm của ngành này!</p>
           </div>
           <div class="nganh-highlights">
-            <div class="hl-box"><div class="hl-num" style="color:var(--cyan)">100%</div><div class="hl-label">Mien hoc phi (THCS)</div></div>
-            <div class="hl-box"><div class="hl-num" style="color:var(--amber)">70%</div><div class="hl-label">Thoi luong thuc hanh</div></div>
-            <div class="hl-box"><div class="hl-num" style="color:var(--accent-2)">1.5-2</div><div class="hl-label">Nam dao tao</div></div>
-            <div class="hl-box"><div class="hl-num" style="color:var(--violet)">100+</div><div class="hl-label">Doanh nghiep doi tac</div></div>
+            <div class="hl-box"><div class="hl-num" style="color:var(--cyan)">100%</div><div class="hl-label">Miễn học phí (THCS)</div></div>
+            <div class="hl-box"><div class="hl-num" style="color:var(--amber)">70%</div><div class="hl-label">Thời lượng thực hành</div></div>
+            <div class="hl-box"><div class="hl-num" style="color:var(--accent-2)">1.5-2</div><div class="hl-label">Năm đào tạo</div></div>
+            <div class="hl-box"><div class="hl-num" style="color:var(--violet)">100+</div><div class="hl-label">Doanh nghiệp đối tác</div></div>
           </div>
           <div class="nganh-cards">
             <div class="nganh-card">
               <div class="nc-icon">&#128187;</div>
               <div class="nc-body">
-                <div class="nc-title">Quan tri vien CSDL (DBA)</div>
-                <div class="nc-salary">8 - 25 trieu/thang</div>
-                <div class="nc-desc">Thiet ke, quan tri, sao luu va bao mat he thong co so du lieu cho doanh nghiep.</div>
+                <div class="nc-title">Quản trị viên CSDL (DBA)</div>
+                <div class="nc-salary">8 - 25 triệu/tháng</div>
+                <div class="nc-desc">Thiết kế, quản trị, sao lưu và bảo mật hệ thống cơ sở dữ liệu cho doanh nghiệp.</div>
               </div>
             </div>
             <div class="nganh-card">
               <div class="nc-icon">&#128200;</div>
               <div class="nc-body">
                 <div class="nc-title">Data Analyst / Engineer</div>
-                <div class="nc-salary">10 - 30 trieu/thang</div>
-                <div class="nc-desc">Khai thac du lieu de dua ra bao cao, du doan xu huong — nganh cuc "hot".</div>
+                <div class="nc-salary">10 - 30 triệu/tháng</div>
+                <div class="nc-desc">Khai thác dữ liệu để đưa ra báo cáo, dự đoán xu hướng — ngành cực "hot".</div>
               </div>
             </div>
           </div>
@@ -939,31 +971,31 @@
         <!-- CNTT -->
         <div class="nganh-hero cntt">
           <div class="nganh-hero-text">
-            <span class="ma-nganh">Ma nganh: 5480201</span>
-            <h2>Cong nghe thong tin</h2>
-            <p>Nganh dao tao toan dien ve phan cung, mang may tinh va phan mem. Ban se lam chu ky thuat lap rap, sua chua, quan tri mang LAN/WAN va lap trinh phan mem ung dung co ban.</p>
+            <span class="ma-nganh">Mã ngành: 5480201</span>
+            <h2>Công nghệ thông tin</h2>
+            <p>Ngành đào tạo toàn diện về phần cứng, mạng máy tính và phần mềm. Bạn sẽ làm chủ kỹ thuật lắp ráp, sửa chữa, quản trị mạng LAN/WAN và lập trình phần mềm ứng dụng cơ bản.</p>
           </div>
           <div class="nganh-highlights">
-            <div class="hl-box"><div class="hl-num" style="color:var(--green-2)">100%</div><div class="hl-label">Mien hoc phi (THCS)</div></div>
-            <div class="hl-box"><div class="hl-num" style="color:var(--amber)">70%</div><div class="hl-label">Thoi luong thuc hanh</div></div>
-            <div class="hl-box"><div class="hl-num" style="color:var(--green-2)">1.5-2</div><div class="hl-label">Nam dao tao</div></div>
-            <div class="hl-box"><div class="hl-num" style="color:var(--rose)">100+</div><div class="hl-label">Doanh nghiep doi tac</div></div>
+            <div class="hl-box"><div class="hl-num" style="color:var(--green-2)">100%</div><div class="hl-label">Miễn học phí (THCS)</div></div>
+            <div class="hl-box"><div class="hl-num" style="color:var(--amber)">70%</div><div class="hl-label">Thời lượng thực hành</div></div>
+            <div class="hl-box"><div class="hl-num" style="color:var(--green-2)">1.5-2</div><div class="hl-label">Năm đào tạo</div></div>
+            <div class="hl-box"><div class="hl-num" style="color:var(--rose)">100+</div><div class="hl-label">Doanh nghiệp đối tác</div></div>
           </div>
           <div class="nganh-cards">
             <div class="nganh-card">
               <div class="nc-icon">&#128295;</div>
               <div class="nc-body">
-                <div class="nc-title">Ky thuat vien IT / Helpdesk</div>
-                <div class="nc-salary">8 - 15 trieu/thang</div>
-                <div class="nc-desc">Ho tro ky thuat, cai dat, sua chua phan cung/phan mem tai cac cong ty, truong hoc.</div>
+                <div class="nc-title">Kỹ thuật viên IT / Helpdesk</div>
+                <div class="nc-salary">8 - 15 triệu/tháng</div>
+                <div class="nc-desc">Hỗ trợ kỹ thuật, cài đặt, sửa chữa phần cứng/phần mềm tại các công ty, trường học.</div>
               </div>
             </div>
             <div class="nganh-card">
               <div class="nc-icon">&#128423;</div>
               <div class="nc-body">
-                <div class="nc-title">Quan tri Mang / System Admin</div>
-                <div class="nc-salary">10 - 25 trieu/thang</div>
-                <div class="nc-desc">Thiet lap, quan tri va bao mat he thong mang, server cho to chuc.</div>
+                <div class="nc-title">Quản trị Mạng / System Admin</div>
+                <div class="nc-salary">10 - 25 triệu/tháng</div>
+                <div class="nc-desc">Thiết lập, quản trị và bảo mật hệ thống mạng, server cho tổ chức.</div>
               </div>
             </div>
           </div>
@@ -973,8 +1005,17 @@
 
     <!-- FOOTER -->
     <footer>
-      <span>Du lieu dong bo qua Supabase Realtime — Truong TC Kinh te - Ky thuat TP. Can Tho</span>
-      <span>Powered by AI Kiosk</span>
+      <div class="qr-box">
+        <img src="QR.png" alt="Quét mã đăng ký">
+        <div class="qr-text">
+          <h3>Đăng ký Xét tuyển Online</h3>
+          <p>Quét mã QR để xem chi tiết ngành học và nộp hồ sơ.</p>
+        </div>
+      </div>
+      <div style="text-align: right;">
+        <span style="display:block;">Dữ liệu đồng bộ qua Supabase Realtime — Trường TC Kinh tế - Kỹ thuật TP. Cần Thơ</span>
+        <span style="color: var(--accent); font-weight: 800;">Powered by AI Kiosk</span>
+      </div>
     </footer>
   </div>
 
@@ -1012,7 +1053,7 @@
             animation: { duration: 500 },
             plugins: {
               legend: { display: false },
-              tooltip: { callbacks: { label: (c) => `${c.raw} luot hoi` } }
+              tooltip: { callbacks: { label: (c) => `${c.raw} lượt hỏi` } }
             },
             scales: {
               x: { beginAtZero: true, ticks: { color: '#94A3B8', precision: 0, font: { family: 'Manrope' } }, grid: { color: 'rgba(148,163,184,0.06)' } },
@@ -1034,7 +1075,7 @@
 
       function renderRank() {
         const entries = sortedEntries();
-        if (!entries.length) { rankListEl.innerHTML = '<div class="empty">Dang cho du lieu...</div>'; return; }
+        if (!entries.length) { rankListEl.innerHTML = '<div class="empty">Đang chờ dữ liệu...</div>'; return; }
         const max = entries[0][1];
         rankListEl.innerHTML = entries.slice(0, 6).map(([cat, count], idx) => `
           <div class="rank-row">
@@ -1056,7 +1097,7 @@
         statTop.textContent = entries.length ? entries[0][0] : '—';
         const cutoff = Date.now() - 15 * 60 * 1000;
         const recent = rows.filter(r => new Date(r.created_at).getTime() >= cutoff).length;
-        statRecent.innerHTML = recent + '<small>cau hoi</small>';
+        statRecent.innerHTML = recent + '<small>câu hỏi</small>';
         statCats.textContent = entries.length;
       }
 
@@ -1065,12 +1106,12 @@
       }
 
       function renderFeed() {
-        if (!rows.length) { feedEl.innerHTML = '<div class="empty">Dang cho cau hoi dau tien...</div>'; return; }
+        if (!rows.length) { feedEl.innerHTML = '<div class="empty">Đang chờ câu hỏi đầu tiên...</div>'; return; }
         feedEl.innerHTML = rows.slice(0, 5).map(r => `
           <div class="feed-item">
             <time>${timeLabel(r.created_at)}</time>
             <span class="tag" style="background:${colorFor(r.category)}">${escapeHtml(r.category)}</span>
-            <div class="q">${escapeHtml(r.question || '(khong co noi dung)')}</div>
+            <div class="q">${escapeHtml(r.question || '(không có nội dung)')}</div>
             ${r.answer ? `<div class="a">${escapeHtml(r.answer)}</div>` : ''}
           </div>
         `).join('');
@@ -1092,7 +1133,7 @@
 
       function renderSqlResult() {
         const entries = sortedEntries();
-        if (!entries.length) { sqlResultEl.textContent = '(chua co du lieu)'; return; }
+        if (!entries.length) { sqlResultEl.textContent = '(chưa có dữ liệu)'; return; }
         sqlResultEl.innerHTML = entries.map(([cat, count]) =>
           `  ${cat.padEnd(34)} | <span class="num">${count}</span>`
         ).join('\n');
@@ -1104,11 +1145,38 @@
 
       function renderAll() { renderChart(); renderRank(); renderFeed(); renderStats(); renderDbTable(); renderSqlResult(); }
 
-      function addRow(row, prepend) {
-        const cat = row.category || 'Khac';
+      function playNotificationSound() {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(880, audioCtx.currentTime); // Note A5
+        oscillator.frequency.exponentialRampToValueAtTime(1100, audioCtx.currentTime + 0.1);
+        gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+        gainNode.gain.linearRampToValueAtTime(0.1, audioCtx.currentTime + 0.05);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+        oscillator.start(audioCtx.currentTime);
+        oscillator.stop(audioCtx.currentTime + 0.5);
+      }
+
+      function addRow(row, prepend, isInitialLoad = false) {
+        const cat = row.category || 'Khác';
         counts[cat] = (counts[cat] || 0) + 1;
         if (prepend) rows.unshift(row); else rows.push(row);
         renderAll();
+        
+        if (!isInitialLoad) {
+          playNotificationSound();
+          // Auto scroll
+          setTimeout(() => {
+            const feedContainer = document.getElementById('feed');
+            const dbTableWrapper = document.getElementById('dbTableWrapper');
+            if (feedContainer) feedContainer.scrollTop = 0;
+            if (dbTableWrapper) dbTableWrapper.scrollTop = 0;
+          }, 100);
+        }
       }
 
       function setConn(ok, text) {
@@ -1121,18 +1189,18 @@
 
       // DEMO MODE
       function runDemoMode() {
-        setConn(false, 'Demo — chua ket noi Supabase');
+        setConn(false, 'Demo — chưa kết nối Supabase');
         const demoCats = [
-          'Quan tri Co so du lieu','Khoa hoc May tinh / Lap trinh','An toan thong tin',
-          'Kinh te - Quan tri Kinh doanh','Ngon ngu - Xa hoi Nhan van','Hoc phi - Hoc bong','Khac'
+          'Quản trị Cơ sở dữ liệu','Khoa học Máy tính / Lập trình','An toàn thông tin',
+          'Kinh tế - Quản trị Kinh doanh','Ngôn ngữ - Xã hội Nhân văn','Học phí - Học bổng','Khác'
         ];
         const demoQ = [
-          { q: 'Nganh Quan tri Co so du lieu ra truong lam cong viec gi?', a: 'Ra truong ban co the lam DBA, Data Analyst, Data Engineer — luong khoi diem 8-15 trieu, sau vai nam len 20-30 trieu!' },
-          { q: 'Hoc phi nganh Quan tri CSDL mot nam bao nhieu?', a: 'Hoc sinh tot nghiep THCS duoc mien 100% hoc phi theo quy dinh Nha nuoc!' },
-          { q: 'Nganh An toan thong tin co kho xin viec khong?', a: 'Nguoc lai luon — nganh nay dang thieu nguoi tram trong, doanh nghiep gianh nhau tuyen!' },
-          { q: 'Truong co hoc bong cho hoc sinh gioi khong?', a: 'Co chu! Hoc bong tuyen thang 100% cho HS gioi cap tinh, 50% cho diem TN cao!' },
-          { q: 'Hoc Quan tri CSDL co duoc thuc hanh nhieu khong?', a: '70% thoi luong la thuc hanh — ban se lam viec truc tiep voi database that, SQL that, du lieu that!' },
-          { q: 'Tot nghiep co duoc gioi thieu viec lam khong?', a: 'Truong lien ket voi hon 100 doanh nghiep, cam ket gioi thieu viec lam ngay sau tot nghiep!' }
+          { q: 'Ngành Quản trị Cơ sở dữ liệu ra trường làm công việc gì?', a: 'Ra trường bạn có thể làm DBA, Data Analyst, Data Engineer — lương khởi điểm 8-15 triệu, sau vài năm lên 20-30 triệu!' },
+          { q: 'Học phí ngành Quản trị CSDL một năm bao nhiêu?', a: 'Học sinh tốt nghiệp THCS được miễn 100% học phí theo quy định Nhà nước!' },
+          { q: 'Ngành An toàn thông tin có khó xin việc không?', a: 'Ngược lại luôn — ngành này đang thiếu người trầm trọng, doanh nghiệp giành nhau tuyển!' },
+          { q: 'Trường có học bổng cho học sinh giỏi không?', a: 'Có chứ! Học bổng tuyển thẳng 100% cho HS giỏi cấp tỉnh, 50% cho điểm TN cao!' },
+          { q: 'Học Quản trị CSDL có được thực hành nhiều không?', a: '70% thời lượng là thực hành — bạn sẽ làm việc trực tiếp với database thật, SQL thật, dữ liệu thật!' },
+          { q: 'Tốt nghiệp có được giới thiệu việc làm không?', a: 'Trường liên kết với hơn 100 doanh nghiệp, cam kết giới thiệu việc làm ngay sau tốt nghiệp!' }
         ];
         let seed = [];
         for (let i = 0; i < 12; i++) {
@@ -1143,21 +1211,21 @@
             question: item.q, answer: item.a
           });
         }
-        seed.reverse().forEach(r => addRow(r, true));
+        seed.reverse().forEach(r => addRow(r, true, true));
         setInterval(() => {
           const item = demoQ[Math.floor(Math.random() * demoQ.length)];
           addRow({
             created_at: new Date().toISOString(),
             category: demoCats[Math.floor(Math.random() * demoCats.length)],
             question: item.q, answer: item.a
-          }, true);
+          }, true, false);
         }, 6000);
       }
 
       // LIVE MODE
       async function runLiveMode() {
         const client = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
-        setConn(false, 'Dang tai du lieu...');
+        setConn(false, 'Đang tải dữ liệu...');
         try {
           const { data, error } = await client
             .from('questions')
@@ -1165,23 +1233,23 @@
             .order('created_at', { ascending: false })
             .limit(300);
           if (error) throw error;
-          (data || []).slice().reverse().forEach(r => addRow(r, true));
+          (data || []).slice().reverse().forEach(r => addRow(r, true, true));
           rows.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
           renderAll();
         } catch (e) {
-          console.error('Loi tai du lieu Supabase:', e);
-          setConn(false, 'Khong tai duoc du lieu');
+          console.error('Lỗi tải dữ liệu Supabase:', e);
+          setConn(false, 'Không tải được dữ liệu');
           return;
         }
-        setConn(true, 'Da ket noi — realtime');
+        setConn(true, 'Đã kết nối — realtime');
         client
           .channel('questions-realtime')
           .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'questions' }, (payload) => {
-            addRow(payload.new, true);
+            addRow(payload.new, true, false);
           })
           .subscribe((status) => {
             if (status === 'SUBSCRIBED') setConn(true, 'Da ket noi — realtime');
-            if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') setConn(false, 'Mat ket noi, dang thu lai...');
+            if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') setConn(false, 'Mất kết nối, đang thử lại...');
           });
         setInterval(renderStats, 30000);
       }
