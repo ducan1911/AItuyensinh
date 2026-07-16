@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Tuyen Sinh — Truong Trung cap Kinh te - Ky thuat TP. Can Tho</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script id="config">
+    window.SUPABASE_URL = "https://vkhxkwlmbyivcedrgstz.supabase.co";
+    window.SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZraHhrd2xtYnlpdmNlZHJnc3R6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQxMjgyMzgsImV4cCI6MjA5OTcwNDIzOH0.dA3NtUMS0d943rC3mQmaTYCBXgx53o3yjqqtjRk7u2A";
+  </script>
+
+  <style>
+    :root {
+      /* LIGHT THEME COLORS */
+      --bg: #F8FAFC;
+      --surface: #FFFFFF;
+      --surface-2: #F1F5F9;
+      --surface-3: #E2E8F0;
+      --text-main: #0F172A;
+      --text-muted: #64748B;
+      --accent: #2563EB;
+      --accent-2: #3B82F6;
+      --green: #059669;
+      --green-2: #10B981;
+      --amber: #D97706;
+      --rose: #E11D48;
+      --violet: #7C3AED;
+      --cyan: #0891B2;
+      --line: #E2E8F0;
+      --glow: rgba(37, 99, 235, 0.15);
+      --shadow: 0 4px 20px -4px rgba(0, 0, 0, 0.05);
+      --shadow-lg: 0 10px 30px -5px rgba(0, 0, 0, 0.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text-main);
+      font-family: 'Manrope', system-ui, sans-serif;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Tối ưu Fullscreen */
+    .wrap {
+      width: 100%;
+      max-width: 1920px; /* Hỗ trợ màn lớn */
+      margin: 0 auto;
+      padding: 24px 32px 32px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ===== NAV BAR ===== */
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 24px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .nav-logo {
+      width: 52px;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      overflow: hidden;
+      background: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .nav-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .nav-title {
+      font-weight: 800;
+      font-size: 18px;
+      letter-spacing: -0.02em;
+      color: var(--accent);
+    }
+
+    .nav-school {
+      font-size: 12.5px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .nav-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+      background: #ECFDF5;
+      color: var(--green);
+      border: 1px solid #D1FAE5;
+    }
+
+    .nav-badge .pulse-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--green);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%,100% { box-shadow: 0 0 0 0 rgba(5, 150, 105, .4); }
+      50% { box-shadow: 0 0 0 8px rgba(5, 150, 105, 0); }
+    }
+
+    .conn-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12.5px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .conn-led {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--green);
+      transition: background .3s;
+    }
+
+    .conn-status.offline .conn-led { background: var(--rose); }
+
+    /* ===== HERO ===== */
+    .hero {
+      text-align: center;
+      padding: 12px 0 24px;
+    }
+
+    .hero h1 {
+      font-family: 'Kalam', cursive;
+      font-weight: 700;
+      font-size: clamp(36px, 4.5vw, 64px);
+      line-height: 1.1;
+      color: var(--text-main);
+      margin-bottom: 12px;
+    }
+
+    .hero p {
+      color: var(--text-muted);
+      font-size: 16px;
+      max-width: 700px;
+      margin: 0 auto;
+      line-height: 1.6;
+      font-weight: 500;
+    }
+
+    /* ===== STATS ===== */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+
+    @media (max-width:900px) { .stats { grid-template-columns: repeat(2, 1fr); } }
+
+    .stat {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 22px 24px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    .stat::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 4px;
+    }
+
+    .stat:nth-child(1)::before { background: var(--accent); }
+    .stat:nth-child(2)::before { background: var(--amber); }
+    .stat:nth-child(3)::before { background: var(--green); }
+    .stat:nth-child(4)::before { background: var(--violet); }
+
+    .stat .label {
+      color: var(--text-muted);
+      font-size: 12.5px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .stat .value {
+      font-weight: 800;
+      font-size: 36px;
+      line-height: 1;
+      color: var(--text-main);
+    }
+
+    .stat .value small {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-left: 6px;
+    }
+
+    /* ===== MAIN GRID ===== */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.9fr 1fr;
+      gap: 24px;
+      margin-bottom: 28px;
+    }
+
+    @media (max-width:1100px) { .main-grid { grid-template-columns: 1fr; } }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 28px;
+      position: relative;
+      box-shadow: var(--shadow);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .card-header h2 {
+      font-weight: 800;
+      font-size: 18px;
+      letter-spacing: -0.01em;
+      color: var(--text-main);
+    }
+
+    .card-header .badge {
+      font-size: 11px;
+      font-weight: 800;
+      padding: 4px 12px;
+      border-radius: 999px;
+      background: #EFF6FF;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+
+    #chartHolder {
+      position: relative;
+      height: 420px; /* Cao hon cho fullscreen */
+    }
+
+    /* ===== RANKING ===== */
+    .rank-list { display: flex; flex-direction: column; gap: 14px; }
+
+    .rank-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: var(--surface-2);
+      transition: background .2s, transform .2s;
+    }
+
+    .rank-row:hover { background: #E2E8F0; transform: translateX(4px); }
+
+    .rank-medal {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 15px;
+      flex-shrink: 0;
+      background: var(--surface-3);
+      color: var(--text-muted);
+    }
+
+    .rank-row:nth-child(1) .rank-medal { background: #FEF3C7; color: #B45309; border: 1px solid #FDE68A; }
+    .rank-row:nth-child(2) .rank-medal { background: #F1F5F9; color: #475569; border: 1px solid #E2E8F0; }
+    .rank-row:nth-child(3) .rank-medal { background: #FFEDD5; color: #C2410C; border: 1px solid #FED7AA; }
+
+    .rank-body { flex: 1; min-width: 0; }
+
+    .rank-top {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      margin-bottom: 8px;
+      gap: 8px;
+    }
+
+    .rank-name { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-main); }
+    .rank-count { color: var(--text-muted); flex-shrink: 0; font-size: 13px; font-weight: 600; }
+
+    .rank-bar-bg {
+      height: 8px;
+      border-radius: 99px;
+      background: var(--surface-3);
+      overflow: hidden;
+    }
+
+    .rank-bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      transition: width .6s cubic-bezier(.4,0,.2,1);
+    }
+
+    .empty {
+      color: var(--text-muted);
+      font-size: 14px;
+      padding: 32px 4px;
+      text-align: center;
+      font-weight: 500;
+    }
+
+    /* ===== FEED ===== */
+    .feed {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-height: 460px;
+      overflow-y: auto;
+      padding-right: 6px;
+    }
+
+    .feed-item {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 16px 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+      animation: slideIn .4s cubic-bezier(.4,0,.2,1);
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .feed-item .q { font-size: 15px; line-height: 1.5; font-weight: 700; margin-top: 10px; color: var(--text-main); }
+    .feed-item .a {
+      font-size: 14px; line-height: 1.5; color: var(--text-muted);
+      border-left: 3px solid var(--accent); padding-left: 12px; margin-top: 8px;
+      font-weight: 500;
+    }
+
+    .tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .03em;
+      padding: 4px 12px;
+      border-radius: 999px;
+      color: #fff;
+    }
+
+    .feed-item time {
+      float: right;
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    /* ===== PIPELINE ===== */
+    .section-title {
+      font-weight: 800;
+      font-size: 24px;
+      letter-spacing: -0.02em;
+      margin-bottom: 6px;
+      color: var(--text-main);
+    }
+
+    .section-sub {
+      color: var(--text-muted);
+      font-size: 14.5px;
+      margin-bottom: 28px;
+      line-height: 1.5;
+      font-weight: 500;
+    }
+
+    .pipeline-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 32px 40px;
+      margin-bottom: 28px;
+      box-shadow: var(--shadow);
+    }
+
+    .pipeline {
+      display: flex;
+      align-items: flex-start;
+      gap: 0;
+      overflow-x: auto;
+      padding: 12px 0;
+    }
+
+    .pipe-step {
+      flex: 1;
+      min-width: 160px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      position: relative;
+    }
+
+    .pipe-step:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      top: 32px;
+      left: calc(50% + 36px);
+      width: calc(100% - 72px);
+      height: 3px;
+      background: repeating-linear-gradient(90deg, var(--accent) 0 8px, transparent 8px 16px);
+      opacity: .4;
+      animation: flowDash 1s linear infinite;
+    }
+
+    @keyframes flowDash { to { background-position: 16px 0; } }
+
+    .pipe-icon {
+      width: 64px; height: 64px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      position: relative;
+      z-index: 1;
+      border: 2px solid var(--line);
+      background: var(--surface-2);
+      transition: all .3s;
+    }
+
+    .pipe-icon.active {
+      border-color: var(--accent);
+      box-shadow: 0 0 24px -4px var(--glow);
+      background: #EFF6FF;
+    }
+
+    .pipe-label { margin-top: 14px; font-weight: 800; font-size: 14px; color: var(--text-main); }
+    .pipe-desc { font-size: 12px; color: var(--text-muted); margin-top: 4px; max-width: 140px; font-weight: 500; line-height: 1.4; }
+
+    .pipe-tech {
+      margin-top: 8px;
+      font-size: 10px; font-weight: 800;
+      letter-spacing: .04em;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: #EFF6FF;
+      color: var(--accent);
+    }
+
+    @media (max-width:800px) {
+      .pipeline { flex-direction: column; align-items: stretch; gap: 12px; }
+      .pipe-step { flex-direction: row; gap: 16px; text-align: left; min-width: auto; }
+      .pipe-step:not(:last-child)::after { display: none; }
+    }
+
+    /* ===== DB DEMO ===== */
+    .db-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 28px;
+    }
+
+    @media (max-width:900px) { .db-grid { grid-template-columns: 1fr; } }
+
+    .db-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .db-table thead th {
+      background: #EFF6FF;
+      color: var(--accent);
+      font-weight: 800;
+      font-size: 11.5px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 2px solid #DBEAFE;
+    }
+
+    .db-table tbody td {
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--line);
+      color: var(--text-main);
+      font-size: 13px;
+      max-width: 220px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-weight: 500;
+    }
+
+    .db-table tbody tr { transition: background .2s; }
+    .db-table tbody tr:hover { background: #F8FAFC; }
+
+    .db-table tbody tr.new-row { animation: rowFlash .8s ease; }
+
+    @keyframes rowFlash {
+      0% { background: #DBEAFE; }
+      100% { background: transparent; }
+    }
+
+    .sql-box {
+      background: #0F172A;
+      border-radius: 12px;
+      padding: 20px;
+      font-family: 'Courier New', 'Consolas', monospace;
+      font-size: 13.5px;
+      line-height: 1.7;
+      color: #F1F5F9;
+      overflow-x: auto;
+      white-space: pre;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .sql-box .kw { color: #60A5FA; font-weight: 700; }
+    .sql-box .fn { color: #FCD34D; }
+    .sql-box .str { color: #34D399; }
+    .sql-box .cm { color: #64748B; font-style: italic; }
+    .sql-box .num { color: #F43F5E; }
+
+    /* ===== NGANH GIOI THIEU ===== */
+    .nganh-section {
+      flex: 1; /* Day footer xuong cung neu it noi dung */
+      margin-bottom: 32px;
+    }
+    
+    .nganh-split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    
+    @media (max-width:1100px) { .nganh-split { grid-template-columns: 1fr; } }
+
+    .nganh-hero {
+      background: #F0F9FF;
+      border: 1px solid #BAE6FD;
+      border-radius: 20px;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      box-shadow: var(--shadow);
+    }
+    
+    .nganh-hero.cntt {
+      background: #ECFDF5;
+      border: 1px solid #A7F3D0;
+    }
+
+    .nganh-hero-text { flex: 1; }
+
+    .nganh-hero-text h2 {
+      font-family: 'Kalam', cursive;
+      font-weight: 700;
+      font-size: clamp(26px, 3vw, 40px);
+      line-height: 1.15;
+      margin-bottom: 12px;
+      color: var(--accent);
+    }
+    
+    .nganh-hero.cntt h2 { color: var(--green); }
+
+    .nganh-hero-text .ma-nganh {
+      font-size: 12px;
+      font-weight: 800;
+      color: #fff;
+      background: var(--accent);
+      padding: 6px 14px;
+      border-radius: 999px;
+      display: inline-block;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 6px rgba(37,99,235,0.2);
+    }
+    
+    .nganh-hero.cntt .ma-nganh {
+      background: var(--green);
+      box-shadow: 0 2px 6px rgba(5,150,105,0.2);
+    }
+
+    .nganh-hero-text p {
+      color: var(--text-main);
+      font-size: 15px;
+      line-height: 1.6;
+      margin-bottom: 28px;
+      font-weight: 500;
+    }
+
+    .nganh-highlights {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .hl-box {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+
+    .hl-box .hl-num {
+      font-size: 32px;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .hl-box .hl-label {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      margin-top: 6px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .nganh-cards {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    .nganh-card {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 20px;
+      transition: transform .2s, box-shadow .2s;
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+
+    .nganh-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--accent);
+    }
+    
+    .nganh-hero.cntt .nganh-card:hover { border-color: var(--green); }
+
+    .nc-icon { 
+      font-size: 36px; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      width: 56px; 
+      height: 56px;
+      background: var(--surface-2);
+      border-radius: 12px;
+    }
+    
+    .nc-body { flex: 1; }
+    
+    .nc-title { font-weight: 800; font-size: 16px; margin-bottom: 6px; color: var(--text-main); }
+    .nc-salary { font-size: 14px; color: var(--amber); font-weight: 800; margin-bottom: 6px; }
+    .nc-desc { font-size: 13px; color: var(--text-muted); line-height: 1.45; font-weight: 500; }
+
+    /* ===== FOOTER ===== */
+    footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--text-muted);
+      font-size: 13px;
+      padding: 24px 0 0;
+      border-top: 1px solid var(--line);
+      flex-wrap: wrap;
+      gap: 12px;
+      font-weight: 600;
+      margin-top: auto; /* Day xuong day container */
+    }
+
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: var(--surface-2); }
+    ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+
+    <!-- NAV -->
+    <nav class="navbar">
+      <div class="nav-brand">
+        <div class="nav-logo">
+          <img src="https://tcktktct.edu.vn/assets_site/images/logo.webp" alt="Logo Truong TC KTKT Can Tho">
+        </div>
+        <div>
+          <div class="nav-title">AI Tuyen Sinh Kiosk</div>
+          <div class="nav-school">Truong TC Kinh te - Ky thuat TP. Can Tho</div>
+        </div>
+      </div>
+      <div class="nav-right">
+        <div class="nav-badge"><span class="pulse-dot"></span> TRUC TIEP</div>
+        <div class="conn-status" id="connStatus">
+          <span class="conn-led"></span>
+          <span id="connText">Dang ket noi...</span>
+        </div>
+      </div>
+    </nav>
+
+    <!-- HERO -->
+    <div class="hero">
+      <h1>Hoc sinh dang hoi gi?</h1>
+      <p>Moi cau hoi qua kiosk AI duoc ghi nhan, phan loai theo nganh va hien thi tren dashboard nay ngay lap tuc. Day chinh la suc manh cua Quan tri Co so du lieu!</p>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats">
+      <div class="stat">
+        <div class="label">Tong so cau hoi</div>
+        <div class="value" id="statTotal">0</div>
+      </div>
+      <div class="stat">
+        <div class="label">Nganh dan dau</div>
+        <div class="value" id="statTop" style="font-size:18px;">—</div>
+      </div>
+      <div class="stat">
+        <div class="label">15 phut gan day</div>
+        <div class="value" id="statRecent">0<small>cau hoi</small></div>
+      </div>
+      <div class="stat">
+        <div class="label">So nganh co nguoi hoi</div>
+        <div class="value" id="statCats">0</div>
+      </div>
+    </div>
+
+    <!-- MAIN 3-COL -->
+    <div class="main-grid">
+      <div class="card">
+        <div class="card-header">
+          <h2>Muc do quan tam theo nganh</h2>
+          <span class="badge">Realtime</span>
+        </div>
+        <div id="chartHolder"><canvas id="chart"></canvas></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2>Bang xep hang</h2>
+          <span class="badge">Top 6</span>
+        </div>
+        <div class="rank-list" id="rankList">
+          <div class="empty">Dang cho du lieu...</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2>Hoi & Dap moi nhat</h2>
+          <span class="badge">Live</span>
+        </div>
+        <div class="feed" id="feed">
+          <div class="empty">Dang cho cau hoi dau tien...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PIPELINE -->
+    <div class="pipeline-card">
+      <div class="section-title">Du lieu chay nhu the nao?</div>
+      <p class="section-sub">Moi cau hoi cua ban di qua 5 buoc xu ly — day chinh la cong viec cua nganh Quan tri Co so du lieu & CNTT</p>
+      <div class="pipeline">
+        <div class="pipe-step">
+          <div class="pipe-icon active">&#127908;</div>
+          <div class="pipe-label">Thu am</div>
+          <div class="pipe-desc">Mic ghi lai giong noi</div>
+          <span class="pipe-tech">ESP32-S3</span>
+        </div>
+        <div class="pipe-step">
+          <div class="pipe-icon active">&#128488;</div>
+          <div class="pipe-label">Chuyen thanh chu</div>
+          <div class="pipe-desc">AI nhan dang giong noi (STT)</div>
+          <span class="pipe-tech">Xiaozhi Server</span>
+        </div>
+        <div class="pipe-step">
+          <div class="pipe-icon active">&#129302;</div>
+          <div class="pipe-label">AI tra loi</div>
+          <div class="pipe-desc">Tra cuu knowledge base</div>
+          <span class="pipe-tech">Dify RAG + Gemini</span>
+        </div>
+        <div class="pipe-step">
+          <div class="pipe-icon active">&#128451;</div>
+          <div class="pipe-label">Luu vao CSDL</div>
+          <div class="pipe-desc">Phan loai + ghi database</div>
+          <span class="pipe-tech">PostgreSQL</span>
+        </div>
+        <div class="pipe-step">
+          <div class="pipe-icon active">&#128202;</div>
+          <div class="pipe-label">Hien thi</div>
+          <div class="pipe-desc">Dashboard cap nhat ngay</div>
+          <span class="pipe-tech">Realtime</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- DB DEMO -->
+    <div class="db-grid">
+      <div class="card">
+        <div class="card-header">
+          <h2>Bang questions (CSDL that)</h2>
+          <span class="badge">PostgreSQL</span>
+        </div>
+        <div style="overflow-x:auto; max-height:320px; overflow-y:auto;">
+          <table class="db-table">
+            <thead>
+              <tr>
+                <th>id</th>
+                <th>created_at</th>
+                <th>question</th>
+                <th>category</th>
+              </tr>
+            </thead>
+            <tbody id="dbTableBody">
+              <tr><td colspan="4" style="text-align:center;color:var(--muted)">Dang cho du lieu...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2>SQL minh hoa</h2>
+          <span class="badge">Live Query</span>
+        </div>
+        <div class="sql-box"><span class="cm">-- Dem so cau hoi theo nganh</span>
+<span class="kw">SELECT</span> category,
+       <span class="fn">COUNT</span>(*) <span class="kw">AS</span> so_luot
+<span class="kw">FROM</span> questions
+<span class="kw">GROUP BY</span> category
+<span class="kw">ORDER BY</span> so_luot <span class="kw">DESC</span>;
+
+<span class="cm">-- Ket qua (cap nhat realtime):</span>
+<span id="sqlResult" class="str"></span></div>
+        <div style="margin-top:14px;">
+          <div class="sql-box"><span class="cm">-- 15 phut gan day</span>
+<span class="kw">SELECT</span> question, category
+<span class="kw">FROM</span> questions
+<span class="kw">WHERE</span> created_at >= <span class="fn">NOW</span>() - <span class="kw">INTERVAL</span> <span class="str">'15 minutes'</span>
+<span class="kw">ORDER BY</span> created_at <span class="kw">DESC</span>;</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- NGANH GIOI THIEU -->
+    <div class="nganh-section">
+      <div class="nganh-split">
+        <!-- QTCSDL -->
+        <div class="nganh-hero">
+          <div class="nganh-hero-text">
+            <span class="ma-nganh">Ma nganh: 5480208</span>
+            <h2>Quan tri Co so du lieu</h2>
+            <p>Nganh hoc giup ban tro thanh nguoi quan ly, bao mat va phan tich du lieu — "tai san quy gia nhat" cua moi doanh nghiep. Chinh he thong dang chay hien tai la mot vi du ve san pham cua nganh nay!</p>
+          </div>
+          <div class="nganh-highlights">
+            <div class="hl-box"><div class="hl-num" style="color:var(--cyan)">100%</div><div class="hl-label">Mien hoc phi (THCS)</div></div>
+            <div class="hl-box"><div class="hl-num" style="color:var(--amber)">70%</div><div class="hl-label">Thoi luong thuc hanh</div></div>
+            <div class="hl-box"><div class="hl-num" style="color:var(--accent-2)">1.5-2</div><div class="hl-label">Nam dao tao</div></div>
+            <div class="hl-box"><div class="hl-num" style="color:var(--violet)">100+</div><div class="hl-label">Doanh nghiep doi tac</div></div>
+          </div>
+          <div class="nganh-cards">
+            <div class="nganh-card">
+              <div class="nc-icon">&#128187;</div>
+              <div class="nc-body">
+                <div class="nc-title">Quan tri vien CSDL (DBA)</div>
+                <div class="nc-salary">8 - 25 trieu/thang</div>
+                <div class="nc-desc">Thiet ke, quan tri, sao luu va bao mat he thong co so du lieu cho doanh nghiep.</div>
+              </div>
+            </div>
+            <div class="nganh-card">
+              <div class="nc-icon">&#128200;</div>
+              <div class="nc-body">
+                <div class="nc-title">Data Analyst / Engineer</div>
+                <div class="nc-salary">10 - 30 trieu/thang</div>
+                <div class="nc-desc">Khai thac du lieu de dua ra bao cao, du doan xu huong — nganh cuc "hot".</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CNTT -->
+        <div class="nganh-hero cntt">
+          <div class="nganh-hero-text">
+            <span class="ma-nganh">Ma nganh: 5480201</span>
+            <h2>Cong nghe thong tin</h2>
+            <p>Nganh dao tao toan dien ve phan cung, mang may tinh va phan mem. Ban se lam chu ky thuat lap rap, sua chua, quan tri mang LAN/WAN va lap trinh phan mem ung dung co ban.</p>
+          </div>
+          <div class="nganh-highlights">
+            <div class="hl-box"><div class="hl-num" style="color:var(--green-2)">100%</div><div class="hl-label">Mien hoc phi (THCS)</div></div>
+            <div class="hl-box"><div class="hl-num" style="color:var(--amber)">70%</div><div class="hl-label">Thoi luong thuc hanh</div></div>
+            <div class="hl-box"><div class="hl-num" style="color:var(--green-2)">1.5-2</div><div class="hl-label">Nam dao tao</div></div>
+            <div class="hl-box"><div class="hl-num" style="color:var(--rose)">100+</div><div class="hl-label">Doanh nghiep doi tac</div></div>
+          </div>
+          <div class="nganh-cards">
+            <div class="nganh-card">
+              <div class="nc-icon">&#128295;</div>
+              <div class="nc-body">
+                <div class="nc-title">Ky thuat vien IT / Helpdesk</div>
+                <div class="nc-salary">8 - 15 trieu/thang</div>
+                <div class="nc-desc">Ho tro ky thuat, cai dat, sua chua phan cung/phan mem tai cac cong ty, truong hoc.</div>
+              </div>
+            </div>
+            <div class="nganh-card">
+              <div class="nc-icon">&#128423;</div>
+              <div class="nc-body">
+                <div class="nc-title">Quan tri Mang / System Admin</div>
+                <div class="nc-salary">10 - 25 trieu/thang</div>
+                <div class="nc-desc">Thiet lap, quan tri va bao mat he thong mang, server cho to chuc.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+      <span>Du lieu dong bo qua Supabase Realtime — Truong TC Kinh te - Ky thuat TP. Can Tho</span>
+      <span>Powered by AI Kiosk</span>
+    </footer>
+  </div>
+
+  <script>
+    (function () {
+      const PALETTE = ['#3B82F6','#F43F5E','#22D3EE','#10B981','#A78BFA','#F59E0B','#FB923C','#EC4899'];
+      const colorFor = (() => {
+        const map = {}; let i = 0;
+        return (cat) => { if (!(cat in map)) { map[cat] = PALETTE[i % PALETTE.length]; i++; } return map[cat]; };
+      })();
+
+      const statTotal = document.getElementById('statTotal');
+      const statTop = document.getElementById('statTop');
+      const statRecent = document.getElementById('statRecent');
+      const statCats = document.getElementById('statCats');
+      const rankListEl = document.getElementById('rankList');
+      const feedEl = document.getElementById('feed');
+      const connText = document.getElementById('connText');
+      const connStatusEl = document.getElementById('connStatus');
+      const dbTableBody = document.getElementById('dbTableBody');
+      const sqlResultEl = document.getElementById('sqlResult');
+
+      let counts = {};
+      let rows = [];
+      let chart;
+
+      function initChart() {
+        const ctx = document.getElementById('chart').getContext('2d');
+        chart = new Chart(ctx, {
+          type: 'bar',
+          data: { labels: [], datasets: [{ data: [], backgroundColor: [], borderRadius: 6, maxBarThickness: 36 }] },
+          options: {
+            indexAxis: 'y',
+            responsive: true, maintainAspectRatio: false,
+            animation: { duration: 500 },
+            plugins: {
+              legend: { display: false },
+              tooltip: { callbacks: { label: (c) => `${c.raw} luot hoi` } }
+            },
+            scales: {
+              x: { beginAtZero: true, ticks: { color: '#94A3B8', precision: 0, font: { family: 'Manrope' } }, grid: { color: 'rgba(148,163,184,0.06)' } },
+              y: { ticks: { color: '#F1F5F9', font: { family: 'Manrope', weight: 600, size: 12 } }, grid: { display: false } }
+            }
+          }
+        });
+      }
+
+      function sortedEntries() { return Object.entries(counts).sort((a, b) => b[1] - a[1]); }
+
+      function renderChart() {
+        const entries = sortedEntries();
+        chart.data.labels = entries.map(e => e[0]);
+        chart.data.datasets[0].data = entries.map(e => e[1]);
+        chart.data.datasets[0].backgroundColor = entries.map(e => colorFor(e[0]));
+        chart.update();
+      }
+
+      function renderRank() {
+        const entries = sortedEntries();
+        if (!entries.length) { rankListEl.innerHTML = '<div class="empty">Dang cho du lieu...</div>'; return; }
+        const max = entries[0][1];
+        rankListEl.innerHTML = entries.slice(0, 6).map(([cat, count], idx) => `
+          <div class="rank-row">
+            <div class="rank-medal">${idx + 1}</div>
+            <div class="rank-body">
+              <div class="rank-top">
+                <span class="rank-name">${escapeHtml(cat)}</span>
+                <span class="rank-count">${count} · ${Math.round(count / rows.length * 100)}%</span>
+              </div>
+              <div class="rank-bar-bg"><div class="rank-bar-fill" style="width:${(count/max*100).toFixed(0)}%;background:${colorFor(cat)}"></div></div>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      function renderStats() {
+        statTotal.textContent = rows.length;
+        const entries = sortedEntries();
+        statTop.textContent = entries.length ? entries[0][0] : '—';
+        const cutoff = Date.now() - 15 * 60 * 1000;
+        const recent = rows.filter(r => new Date(r.created_at).getTime() >= cutoff).length;
+        statRecent.innerHTML = recent + '<small>cau hoi</small>';
+        statCats.textContent = entries.length;
+      }
+
+      function timeLabel(iso) {
+        return new Date(iso).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+      }
+
+      function renderFeed() {
+        if (!rows.length) { feedEl.innerHTML = '<div class="empty">Dang cho cau hoi dau tien...</div>'; return; }
+        feedEl.innerHTML = rows.slice(0, 5).map(r => `
+          <div class="feed-item">
+            <time>${timeLabel(r.created_at)}</time>
+            <span class="tag" style="background:${colorFor(r.category)}">${escapeHtml(r.category)}</span>
+            <div class="q">${escapeHtml(r.question || '(khong co noi dung)')}</div>
+            ${r.answer ? `<div class="a">${escapeHtml(r.answer)}</div>` : ''}
+          </div>
+        `).join('');
+      }
+
+      function renderDbTable() {
+        if (!rows.length) { dbTableBody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted)">Dang cho du lieu...</td></tr>'; return; }
+        dbTableBody.innerHTML = rows.slice(0, 8).map((r, i) => {
+          const id = String(rows.length - i).padStart(3, '0');
+          const time = new Date(r.created_at).toLocaleTimeString('vi-VN', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+          return `<tr class="${i === 0 ? 'new-row' : ''}">
+            <td style="color:var(--muted)">${id}</td>
+            <td style="color:var(--accent-2)">${time}</td>
+            <td>${escapeHtml((r.question||'').substring(0,45))}${(r.question||'').length>45?'...':''}</td>
+            <td><span class="tag" style="background:${colorFor(r.category)};font-size:9px">${escapeHtml(r.category)}</span></td>
+          </tr>`;
+        }).join('');
+      }
+
+      function renderSqlResult() {
+        const entries = sortedEntries();
+        if (!entries.length) { sqlResultEl.textContent = '(chua co du lieu)'; return; }
+        sqlResultEl.innerHTML = entries.map(([cat, count]) =>
+          `  ${cat.padEnd(34)} | <span class="num">${count}</span>`
+        ).join('\n');
+      }
+
+      function escapeHtml(s) {
+        return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+      }
+
+      function renderAll() { renderChart(); renderRank(); renderFeed(); renderStats(); renderDbTable(); renderSqlResult(); }
+
+      function addRow(row, prepend) {
+        const cat = row.category || 'Khac';
+        counts[cat] = (counts[cat] || 0) + 1;
+        if (prepend) rows.unshift(row); else rows.push(row);
+        renderAll();
+      }
+
+      function setConn(ok, text) {
+        connStatusEl.classList.toggle('offline', !ok);
+        connText.textContent = text;
+      }
+
+      // Skills visualization
+      function renderSkills() {}
+
+      // DEMO MODE
+      function runDemoMode() {
+        setConn(false, 'Demo — chua ket noi Supabase');
+        const demoCats = [
+          'Quan tri Co so du lieu','Khoa hoc May tinh / Lap trinh','An toan thong tin',
+          'Kinh te - Quan tri Kinh doanh','Ngon ngu - Xa hoi Nhan van','Hoc phi - Hoc bong','Khac'
+        ];
+        const demoQ = [
+          { q: 'Nganh Quan tri Co so du lieu ra truong lam cong viec gi?', a: 'Ra truong ban co the lam DBA, Data Analyst, Data Engineer — luong khoi diem 8-15 trieu, sau vai nam len 20-30 trieu!' },
+          { q: 'Hoc phi nganh Quan tri CSDL mot nam bao nhieu?', a: 'Hoc sinh tot nghiep THCS duoc mien 100% hoc phi theo quy dinh Nha nuoc!' },
+          { q: 'Nganh An toan thong tin co kho xin viec khong?', a: 'Nguoc lai luon — nganh nay dang thieu nguoi tram trong, doanh nghiep gianh nhau tuyen!' },
+          { q: 'Truong co hoc bong cho hoc sinh gioi khong?', a: 'Co chu! Hoc bong tuyen thang 100% cho HS gioi cap tinh, 50% cho diem TN cao!' },
+          { q: 'Hoc Quan tri CSDL co duoc thuc hanh nhieu khong?', a: '70% thoi luong la thuc hanh — ban se lam viec truc tiep voi database that, SQL that, du lieu that!' },
+          { q: 'Tot nghiep co duoc gioi thieu viec lam khong?', a: 'Truong lien ket voi hon 100 doanh nghiep, cam ket gioi thieu viec lam ngay sau tot nghiep!' }
+        ];
+        let seed = [];
+        for (let i = 0; i < 12; i++) {
+          const item = demoQ[Math.floor(Math.random() * demoQ.length)];
+          seed.push({
+            created_at: new Date(Date.now() - i * 75000).toISOString(),
+            category: demoCats[Math.floor(Math.random() * demoCats.length)],
+            question: item.q, answer: item.a
+          });
+        }
+        seed.reverse().forEach(r => addRow(r, true));
+        setInterval(() => {
+          const item = demoQ[Math.floor(Math.random() * demoQ.length)];
+          addRow({
+            created_at: new Date().toISOString(),
+            category: demoCats[Math.floor(Math.random() * demoCats.length)],
+            question: item.q, answer: item.a
+          }, true);
+        }, 6000);
+      }
+
+      // LIVE MODE
+      async function runLiveMode() {
+        const client = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+        setConn(false, 'Dang tai du lieu...');
+        try {
+          const { data, error } = await client
+            .from('questions')
+            .select('created_at, question, answer, category')
+            .order('created_at', { ascending: false })
+            .limit(300);
+          if (error) throw error;
+          (data || []).slice().reverse().forEach(r => addRow(r, true));
+          rows.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+          renderAll();
+        } catch (e) {
+          console.error('Loi tai du lieu Supabase:', e);
+          setConn(false, 'Khong tai duoc du lieu');
+          return;
+        }
+        setConn(true, 'Da ket noi — realtime');
+        client
+          .channel('questions-realtime')
+          .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'questions' }, (payload) => {
+            addRow(payload.new, true);
+          })
+          .subscribe((status) => {
+            if (status === 'SUBSCRIBED') setConn(true, 'Da ket noi — realtime');
+            if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') setConn(false, 'Mat ket noi, dang thu lai...');
+          });
+        setInterval(renderStats, 30000);
+      }
+
+      initChart();
+      renderSkills();
+      const isPlaceholder = window.SUPABASE_URL.includes('YOUR-PROJECT') || window.SUPABASE_ANON_KEY.includes('YOUR-ANON');
+      if (isPlaceholder || typeof supabase === 'undefined') {
+        runDemoMode();
+      } else {
+        runLiveMode();
+      }
+    })();
+  </script>
+
+</body>
+
+</html>
