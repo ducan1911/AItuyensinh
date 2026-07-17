@@ -176,6 +176,27 @@ def health():
     return jsonify({"status": "ok", "time": time.time()})
 
 
+@app.route("/webhook/log", methods=["POST"])
+def webhook_log():
+    """
+    Endpoint nhận câu hỏi từ MCP custom service của xiaozhi.me.
+    xiaozhi.me gọi POST tới đây sau mỗi lượt hội thoại.
+    Body JSON: { "question": "...", "answer": "..." }
+    """
+    body = request.get_json(force=True, silent=True) or {}
+    question = body.get("question", "").strip()
+    answer = body.get("answer", "").strip()
+
+    if not question:
+        return jsonify({"status": "ignored", "reason": "empty question"}), 200
+
+    category = classify_category(question, answer)
+    log_to_supabase(question, answer, category)
+    log.info("Webhook log: category=%s | question=%s", category, question[:60])
+
+    return jsonify({"status": "ok", "category": category}), 200
+
+
 @app.route("/v1/chat/completions", methods=["POST"])
 def chat_completions():
     """
