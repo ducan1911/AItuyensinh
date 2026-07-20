@@ -9,6 +9,6 @@ services:
   - type: web
     name: xiaozhi-custom-server
     env: docker
-    dockerFilePath: xiaozhi-custom-server/Dockerfile
+    dockerfilePath: xiaozhi-custom-server/Dockerfile
     dockerContext: xiaozhi-custom-server
     plan: free
