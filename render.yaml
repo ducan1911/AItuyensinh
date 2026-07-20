@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: aituyensinh-bridge
+    name: AItuyensinh
     env: python
     buildCommand: "pip install -r requirements.txt"
     startCommand: "gunicorn dify_bridge:app"
