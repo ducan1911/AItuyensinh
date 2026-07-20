@@ -1,0 +1,216 @@
+Dựa vào file dashboard.html và bản chất của dự án (Kiosk tư vấn), đây là một vài ý tưởng nâng cao bạn có thể cân nhắc thêm để làm cho sản phẩm "xịn" hơn nữa:
+Về mặt Giao diện (UI/UX)
+1. Chế độ màn hình chờ (Screensaver / Attract Mode): Khi không có ai hỏi trong vòng 2-3 phút, dashboard có thể chuyển sang một video toàn màn hình giới thiệu trường, hoặc các dòng chữ chạy ngang "Nhấn nút để hỏi AI", kèm theo mã QR siêu to khổng lồ. Khi có câu hỏi mới bắn về từ Supabase, màn hình tự động quay lại dashboard chính.
+2. Hiệu ứng "Đang xử lý": Hiện tại khi học sinh nhấn nút và nói, trên dashboard chưa hiện gì cho đến khi có dữ liệu ghi vào DB (bước cuối cùng). Bạn có thể thêm 1 event websocket riêng lẻ (ví dụ: dùng Supabase Realtime dạng broadcast) để khi ESP32 bắt đầu thu âm -> Dashboard hiện popup "Đang nghe..." -> "Đang suy nghĩ..." -> Cuối cùng hiện câu trả lời.
+3. Tuỳ biến màu theo ngành: Ngành Công nghệ thông tin màu Xanh lá, Quản trị CSDL màu Xanh dương... Nếu người dùng vừa hỏi về CNTT, toàn bộ hiệu ứng glow (viền phát sáng) của dashboard tạm đổi sang Xanh lá trong vài giây.
+Về mặt Chức năng & Dữ liệu
+4. Hiển thị Audio Waveform: Thêm một đoạn Canvas vẽ biểu đồ sóng âm thanh giả lập khi người dùng nói (nếu không truyền được audio thật từ ESP32 lên, thì chỉ cần kích hoạt hiệu ứng giả lập chạy ngẫu nhiên khi nhận tín hiệu "Đang nói").
+5. Thống kê chuyên sâu (Word Cloud): Lọc ra các "từ khoá" xuất hiện nhiều nhất trong câu hỏi (ví dụ: "học phí", "việc làm", "điểm chuẩn") và hiển thị chúng thành một đám mây từ vựng (Word Cloud) lớn nhỏ tuỳ vào tần suất xuất hiện.
+6. Lịch sử toàn thời gian (Dashboard dành riêng cho BGH): Hiện tại dashboard chỉ lấy 300 câu hỏi gần nhất để chạy cho mượt. Bạn có thể làm thêm 1 trang admin.html để ban giám hiệu xem thống kê từ đầu dự án đến nay, xuất báo cáo ra file Excel.
+Nếu bạn thấy tính năng nào thú vị và muốn làm ngay, hãy nói với tôi, tôi sẽ hướng dẫn hoặc viết code luôn cho bạn!
+▣  Build · opencode · 33.9s
+hãy viết hết tất cả nhé
+# Todos
+[•] Cập nhật dashboard.html: Màn hình chờ (Screensaver), Waveform giả lập, đổi màu theo ngành, và Word Cloud
+[ ] Tạo admin.html: Trang quản trị full lịch sử và xuất file Excel
+[ ] Cập nhật dify_bridge.py để push thông báo 'Đang suy nghĩ...' (Tuỳ chọn)
+[ ] Push tất cả lên GitHub
+Đây là khối lượng công việc lớn. Tôi sẽ tiến hành từng bước. 
+Đầu tiên là cập nhật dashboard.html để thêm:
+1. Màn hình chờ (Screensaver) hiện ra nếu không có hoạt động trong 60 giây.
+2. Word Cloud thay thế phần Text giới thiệu để thêm sinh động.
+3. Đổi màu Glow theo ngành mới nhất.
+4. Hiệu ứng thu âm giả lập.
+←Edit dashboard.html 
+Do CSS khá phức tạp, tôi sẽ đọc phần CSS của nganh-section để thay thế đoạn giới thiệu bằng Word Cloud và hiệu ứng.
+→Read dashboard.html [offset=680, limit=50]
+← Edit dashboard.html
+.nc-title { font-weight: 800; font-size: 16px; margin-bottom: 6px; color: var(--text-main); }
+.nc-salary { font-size: 14px; color: var(--amber); font-weight: 800; margin-bottom: 6px; }
+.nc-desc { font-size: 13px; color: var(--text-muted); line-height: 1.45; font-weight: 500; }
+
+/* ===== WORD CLOUD BOX ===== */
+.word-cloud-box {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 20px;
+  height: 100%;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+#wordCloudCanvas {
+  width: 100%;
+  height: 400px;
+}
+
+/* ===== SCREENSAVER ===== */
+#screensaver {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+  background: rgba(15, 23, 42, 0.95);
+  z-index: 9999;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.8s;
+  backdrop-filter: blur(10px);
+}
+#screensaver.active { opacity: 1; pointer-events: auto; }
+.ss-title { font-family: 'Kalam', cursive; font-size: 6vw; font-weight: 700; color: #fff; margin-bottom: 20px; text-shadow: 0 4px 20px rgba(37,99,235,0.5); }
+.ss-sub { font-size: 2vw; color: #94A3B8; margin-bottom: 40px; }
+.ss-qr { width: 300px; height: 300px; border-radius: 20px; border: 4px solid var(--accent); padding: 10px; background: #fff; }
+.pulse-mic { margin-top: 40px; font-size: 40px; color: var(--accent); animation: pulseMic 1.5s infinite; }
+@keyframes pulseMic { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(1.5); opacity: 0; } }
+
+/* ===== STATUS OVERLAY (Đang nghe...) ===== */
+#statusOverlay {
+  position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px);
+  background: #0F172A; color: #fff; padding: 16px 32px; border-radius: 999px;
+  font-weight: 700; font-size: 16px; display: flex; align-items: center; gap: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3); opacity: 0; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 8000; border: 1px solid rgba(255,255,255,0.1);
+}
+#statusOverlay.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+.status-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); animation: blink 1s infinite alternate; }
+@keyframes blink { 0% { opacity: 0.3; } 100% { opacity: 1; box-shadow: 0 0 10px var(--accent); } }
+
+/* ===== QR CODE ===== */
+.qr-box {
+  background: var(--surface);
+  border: 1px solid var(--line);
+← Edit dashboard.html
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/wordcloud2.js/1.2.2/wordcloud2.min.js"></script>
+
+<script id="config">
+  window.SUPABASE_URL = "https://vkhxkwlmbyivcedrgstz.supabase.co";
+  window.SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZraHhrd2xtYnlpdmNlZHJnc3R6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQxMjgyMzgsImV4cCI6MjA5OTcwNDIzOH0.dA3NtUMS0d943rC3mQmaTYCBXgx53o3yjqqtjRk7u2A";
+← Edit dashboard.html
+  </style>
+</head>
+
+<body>
+  <!-- STATUS OVERLAY -->
+  <div id="statusOverlay">
+    <div class="status-dot"></div>
+    <span id="statusText">Đang nghe...</span>
+  </div>
+
+  <!-- SCREENSAVER -->
+  <div id="screensaver">
+    <div class="ss-title">Xin chào! Nhấn nút để hỏi AI</div>
+    <div class="ss-sub">Hệ thống tư vấn tuyển sinh tự động thông minh</div>
+    <div class="ss-qr"><img src="QR.png" alt="QR" style="width:100%;height:100%;object-fit:cover;"></div>
+    <div class="pulse-mic">&#127908;</div>
+  </div>
+
+  <div class="wrap">
+
+    <!-- NAV -->
+    <nav class="navbar">
+Bây giờ tôi thay phần giới thiệu ngành bằng giao diện có Word Cloud.
+← Edit dashboard.html
+    </div>
+  </div>
+</div>
+
+<!-- NGANH GIOI THIEU -->
+<!-- NGANH GIOI THIEU & WORD CLOUD -->
+<div class="nganh-section">
+  <div class="nganh-split">
+    <!-- QTCSDL -->
+    <div class="nganh-hero">
+      <div class="nganh-hero-text">
+        <span class="ma-nganh">Mã ngành: 5480208</span>
+        <h2>Quản trị Cơ sở dữ liệu</h2>
+        <p>Ngành học giúp bạn trở thành người quản lý, bảo mật và phân tích dữ liệu — "tài sản quý giá nhất" của mọi doanh nghiệp. Chính hệ thống đang chạy hiện tại là một ví dụ về sản phẩm của ngành này!</p>
+        <p>Ngành học giúp bạn trở thành người quản lý, bảo mật và phân tích dữ liệu — "tài sản quý giá nhất" của mọi doanh nghiệp.</p>
+      </div>
+      <div class="nganh-highlights">
+        <div class="hl-box"><div class="hl-num" style="color:var(--cyan)">100%</div><div class="hl-label">Miễn học phí (THCS)</div></div>
+        <div class="hl-box"><div class="hl-num" style="color:var(--amber)">70%</div><div class="hl-label">Thời lượng thực hành</div></div>
+        <div class="hl-box"><div class="hl-num" style="color:var(--accent-2)">1.5-2</div><div class="hl-label">Năm đào tạo</div></div>
+        <div class="hl-box"><div class="hl-num" style="color:var(--violet)">100+</div><div class="hl-label">Doanh nghiệp đối tác</div></div>
+      <div class="nganh-highlights" style="margin-bottom: 0;">
+        <div class="hl-box"><div class="hl-num" style="color:var(--cyan)">100%</div><div class="hl-label">Miễn học phí</div></div>
+        <div class="hl-box"><div class="hl-num" style="color:var(--amber)">70%</div><div class="hl-label">Thực hành</div></div>
+      </div>
+      <div class="nganh-cards">
+        <div class="nganh-card">
+          <div class="nc-icon">&#128187;</div>
+          <div class="nc-body">
+            <div class="nc-title">Quản trị viên CSDL (DBA)</div>
+            <div class="nc-salary">8 - 25 triệu/tháng</div>
+            <div class="nc-desc">Thiết kế, quản trị, sao lưu và bảo mật hệ thống cơ sở dữ liệu cho doanh nghiệp.</div>
+          </div>
+        </div>
+        <div class="nganh-card">
+          <div class="nc-icon">&#128200;</div>
+          <div class="nc-body">
+            <div class="nc-title">Data Analyst / Engineer</div>
+            <div class="nc-salary">10 - 30 triệu/tháng</div>
+            <div class="nc-desc">Khai thác dữ liệu để đưa ra báo cáo, dự đoán xu hướng — ngành cực "hot".</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CNTT -->
+    <div class="nganh-hero cntt">
+      <div class="nganh-hero-text">
+        <span class="ma-nganh">Mã ngành: 5480201</span>
+        <h2>Công nghệ thông tin</h2>
+        <p>Ngành đào tạo toàn diện về phần cứng, mạng máy tính và phần mềm. Bạn sẽ làm chủ kỹ thuật lắp ráp, sửa chữa, quản trị mạng LAN/WAN và lập trình phần mềm ứng dụng cơ bản.</p>
+      </div>
+      <div class="nganh-highlights">
+        <div class="hl-box"><div class="hl-num" style="color:var(--green-2)">100%</div><div class="hl-label">Miễn học phí (THCS)</div></div>
+        <div class="hl-box"><div class="hl-num" style="color:var(--amber)">70%</div><div class="hl-label">Thời lượng thực hành</div></div>
+        <div class="hl-box"><div class="hl-num" style="color:var(--green-2)">1.5-2</div><div class="hl-label">Năm đào tạo</div></div>
+        <div class="hl-box"><div class="hl-num" style="color:var(--rose)">100+</div><div class="hl-label">Doanh nghiệp đối tác</div></div>
+      </div>
+      <div class="nganh-cards">
+        <div class="nganh-card">
+          <div class="nc-icon">&#128295;</div>
+          <div class="nc-body">
+            <div class="nc-title">Kỹ thuật viên IT / Helpdesk</div>
+            <div class="nc-salary">8 - 15 triệu/tháng</div>
+            <div class="nc-desc">Hỗ trợ kỹ thuật, cài đặt, sửa chữa phần cứng/phần mềm tại các công ty, trường học.</div>
+          </div>
+        </div>
+        <div class="nganh-card">
+          <div class="nc-icon">&#128423;</div>
+          <div class="nc-body">
+            <div class="nc-title">Quản trị Mạng / System Admin</div>
+            <div class="nc-salary">10 - 25 triệu/tháng</div>
+            <div class="nc-desc">Thiết lập, quản trị và bảo mật hệ thống mạng, server cho tổ chức.</div>
+          </div>
+        </div>
+      </div>
+    <!-- WORD CLOUD -->
+    <div class="word-cloud-box">
+      <h2 style="font-weight: 800; font-size: 18px; margin-bottom: 12px; color: var(--text-main);">Từ khoá được hỏi nhiều nhất</h2>
+      <canvas id="wordCloudCanvas"></canvas>
+    </div>
+  </div>
+</div>
+
+Giờ tôi sẽ cập nhật script JS để:
+- Chạy Word Cloud
+- Chạy Screensaver timer
+- Thay đổi Glow màu nền
+- Xử lý event "Đang xử lý"
+←Edit dashboard.html 
+Tôi sẽ dùng cách regex replace hoặc offset đọc dòng:
+→Read dashboard.html [limit=30, offset=1097]
+→Read dashboard.html [offset=1162, limit=40]
+←Edit dashboard.html 
+Tôi bị nhầm đoạn cũ. Để tôi lấy chính xác từ file.
+→Read dashboard.html [limit=40, offset=1145]
+▣  Build · opencode
+Build·opencode9router
+gemini is way too hot right now (click to expand) [retrying in 1m 37s attempt #7]

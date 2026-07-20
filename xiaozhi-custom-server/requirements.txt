@@ -1,0 +1,10 @@
+# Create requirements.txt for the new custom server
+flask
+requests
+python-dotenv
+gunicorn
+websocket-client
+websockets
+edge-tts
+pydub
+numpy

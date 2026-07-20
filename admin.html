@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — AI Tuyển Sinh Kiosk</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+
+  <script id="config">
+    window.SUPABASE_URL = "https://vkhxkwlmbyivcedrgstz.supabase.co";
+    window.SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZraHhrd2xtYnlpdmNlZHJnc3R6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQxMjgyMzgsImV4cCI6MjA5OTcwNDIzOH0.dA3NtUMS0d943rC3mQmaTYCBXgx53o3yjqqtjRk7u2A";
+  </script>
+
+  <style>
+    :root {
+      --bg: #F8FAFC;
+      --surface: #FFFFFF;
+      --surface-2: #F1F5F9;
+      --surface-3: #E2E8F0;
+      --text-main: #0F172A;
+      --text-muted: #64748B;
+      --accent: #2563EB;
+      --accent-2: #3B82F6;
+      --green: #059669;
+      --amber: #D97706;
+      --rose: #E11D48;
+      --violet: #7C3AED;
+      --line: #E2E8F0;
+      --shadow: 0 4px 20px -4px rgba(0,0,0,0.05);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text-main);
+      font-family: 'Manrope', system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .wrap {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 24px 32px 48px;
+    }
+
+    /* NAV */
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 24px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      margin-bottom: 28px;
+      box-shadow: var(--shadow);
+    }
+
+    .nav-brand { display: flex; align-items: center; gap: 14px; }
+    .nav-title { font-weight: 800; font-size: 18px; color: var(--accent); }
+    .nav-sub { font-size: 12px; color: var(--text-muted); font-weight: 600; }
+
+    .nav-right { display: flex; align-items: center; gap: 12px; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: #1D4ED8; }
+    .btn-success { background: var(--green); color: #fff; }
+    .btn-success:hover { background: #047857; }
+    .btn-outline {
+      background: transparent;
+      color: var(--accent);
+      border: 1.5px solid var(--accent);
+    }
+    .btn-outline:hover { background: #EFF6FF; }
+
+    /* STATS */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    @media (max-width: 900px) { .stats { grid-template-columns: repeat(2, 1fr); } }
+
+    .stat {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 20px 22px;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 3px;
+    }
+
+    .stat:nth-child(1)::before { background: var(--accent); }
+    .stat:nth-child(2)::before { background: var(--green); }
+    .stat:nth-child(3)::before { background: var(--amber); }
+    .stat:nth-child(4)::before { background: var(--violet); }
+    .stat:nth-child(5)::before { background: var(--rose); }
+
+    .stat .label {
+      color: var(--text-muted);
+      font-size: 11.5px;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .stat .value {
+      font-weight: 800;
+      font-size: 30px;
+      line-height: 1;
+      color: var(--text-main);
+    }
+
+    /* FILTERS */
+    .filters {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 20px 24px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow);
+      display: flex;
+      gap: 16px;
+      align-items: flex-end;
+      flex-wrap: wrap;
+    }
+
+    .filter-group { display: flex; flex-direction: column; gap: 6px; }
+
+    .filter-group label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+
+    .filter-group input,
+    .filter-group select {
+      padding: 9px 14px;
+      border: 1.5px solid var(--line);
+      border-radius: 8px;
+      font-size: 13px;
+      font-family: 'Manrope', sans-serif;
+      font-weight: 600;
+      color: var(--text-main);
+      background: var(--surface-2);
+      outline: none;
+      transition: border .2s;
+      min-width: 160px;
+    }
+
+    .filter-group input:focus,
+    .filter-group select:focus { border-color: var(--accent); background: #fff; }
+
+    /* GRID: CHART + TABLE */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 24px;
+      margin-bottom: 28px;
+    }
+
+    @media (max-width: 1100px) { .main-grid { grid-template-columns: 1fr; } }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 24px 28px;
+      box-shadow: var(--shadow);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+
+    .card-header h2 {
+      font-weight: 800;
+      font-size: 16px;
+      color: var(--text-main);
+    }
+
+    .badge {
+      font-size: 11px;
+      font-weight: 800;
+      padding: 4px 12px;
+      border-radius: 999px;
+      background: #EFF6FF;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+
+    #pieHolder { position: relative; height: 280px; }
+
+    /* TABLE */
+    .table-wrap {
+      overflow-x: auto;
+      max-height: 480px;
+      overflow-y: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    thead th {
+      background: #EFF6FF;
+      color: var(--accent);
+      font-weight: 800;
+      font-size: 11.5px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 2px solid #DBEAFE;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+    }
+
+    thead th:hover { background: #DBEAFE; }
+    thead th.sort-asc::after { content: ' ↑'; }
+    thead th.sort-desc::after { content: ' ↓'; }
+
+    tbody td {
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--line);
+      color: var(--text-main);
+      font-weight: 500;
+      vertical-align: middle;
+    }
+
+    tbody tr:hover { background: #F8FAFC; }
+
+    .tag {
+      display: inline-block;
+      font-size: 10.5px;
+      font-weight: 800;
+      padding: 3px 10px;
+      border-radius: 999px;
+      color: #fff;
+      white-space: nowrap;
+    }
+
+    .td-question { max-width: 380px; }
+    .td-answer { max-width: 300px; color: var(--text-muted); font-size: 12.5px; }
+
+    /* TREND CHART */
+    #trendHolder { position: relative; height: 220px; }
+
+    /* PAGINATION */
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 16px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .pagination-info { font-size: 13px; color: var(--text-muted); font-weight: 600; }
+
+    .page-btns { display: flex; gap: 6px; }
+
+    .page-btn {
+      padding: 7px 14px;
+      border: 1.5px solid var(--line);
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      background: var(--surface);
+      color: var(--text-main);
+      cursor: pointer;
+      transition: all .2s;
+    }
+
+    .page-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .page-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* LOADING */
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 60px;
+      color: var(--text-muted);
+      font-weight: 600;
+      gap: 12px;
+    }
+
+    .spinner {
+      width: 20px; height: 20px;
+      border: 3px solid var(--line);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* TOAST */
+    #toast {
+      position: fixed;
+      bottom: 30px; right: 30px;
+      background: #0F172A;
+      color: #fff;
+      padding: 14px 24px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 14px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.3s;
+      z-index: 9999;
+    }
+
+    #toast.show { opacity: 1; transform: translateY(0); }
+
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--surface-2); }
+    ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 4px; }
+  </style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- NAV -->
+  <nav class="navbar">
+    <div class="nav-brand">
+      <div>
+        <div class="nav-title">Admin Dashboard</div>
+        <div class="nav-sub">Trường TC Kinh tế - Kỹ thuật TP. Cần Thơ · AI Kiosk</div>
+      </div>
+    </div>
+    <div class="nav-right">
+      <a href="dashboard.html" class="btn btn-outline">← Dashboard chính</a>
+      <button class="btn btn-success" id="btnExcel">⬇ Xuất Excel</button>
+      <button class="btn btn-primary" id="btnRefresh">↺ Tải lại</button>
+    </div>
+  </nav>
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat"><div class="label">Tổng câu hỏi</div><div class="value" id="sTotal">—</div></div>
+    <div class="stat"><div class="label">Hôm nay</div><div class="value" id="sToday">—</div></div>
+    <div class="stat"><div class="label">Tuần này</div><div class="value" id="sWeek">—</div></div>
+    <div class="stat"><div class="label">Số ngành</div><div class="value" id="sCats">—</div></div>
+    <div class="stat"><div class="label">Ngành hot nhất</div><div class="value" id="sTop" style="font-size:14px;line-height:1.3;">—</div></div>
+  </div>
+
+  <!-- TREND CHART -->
+  <div class="card" style="margin-bottom:24px;">
+    <div class="card-header">
+      <h2>Câu hỏi theo ngày</h2>
+      <span class="badge">7 ngày gần nhất</span>
+    </div>
+    <div id="trendHolder"><canvas id="trendChart"></canvas></div>
+  </div>
+
+  <!-- FILTERS -->
+  <div class="filters">
+    <div class="filter-group">
+      <label>Từ ngày</label>
+      <input type="date" id="fFrom">
+    </div>
+    <div class="filter-group">
+      <label>Đến ngày</label>
+      <input type="date" id="fTo">
+    </div>
+    <div class="filter-group">
+      <label>Ngành</label>
+      <select id="fCat">
+        <option value="">Tất cả ngành</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>Tìm kiếm</label>
+      <input type="text" id="fSearch" placeholder="Nhập từ khoá...">
+    </div>
+    <button class="btn btn-primary" id="btnFilter" style="margin-bottom:0">Lọc</button>
+    <button class="btn btn-outline" id="btnReset" style="margin-bottom:0">Xoá bộ lọc</button>
+  </div>
+
+  <!-- MAIN GRID: PIE + TABLE -->
+  <div class="main-grid">
+    <div class="card">
+      <div class="card-header">
+        <h2>Phân bổ theo ngành</h2>
+        <span class="badge" id="pieLabel">Tất cả</span>
+      </div>
+      <div id="pieHolder"><canvas id="pieChart"></canvas></div>
+      <div id="legendList" style="margin-top:16px;display:flex;flex-direction:column;gap:8px;"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2>Lịch sử câu hỏi</h2>
+        <span class="badge" id="tableCount">0 kết quả</span>
+      </div>
+      <div class="table-wrap" id="tableWrap">
+        <div class="loading"><div class="spinner"></div>Đang tải dữ liệu...</div>
+      </div>
+      <div class="pagination" id="pagination"></div>
+    </div>
+  </div>
+
+</div>
+
+<div id="toast"></div>
+
+<script>
+(function () {
+  const PALETTE = ['#3B82F6','#10B981','#7C3AED','#F59E0B','#EC4899','#0891B2','#F43F5E','#FB923C'];
+  const CAT_COLORS = {
+    'Quản trị Cơ sở dữ liệu': '#2563EB',
+    'Khoa học Máy tính / Lập trình': '#10B981',
+    'An toàn thông tin': '#7C3AED',
+    'Kinh tế - Quản trị Kinh doanh': '#F59E0B',
+    'Ngôn ngữ - Xã hội Nhân văn': '#EC4899',
+    'Học phí - Học bổng': '#0891B2',
+    'Khác': '#64748B'
+  };
+  let palIdx = 0;
+  const catColorMap = {};
+  function colorFor(cat) {
+    if (!catColorMap[cat]) catColorMap[cat] = CAT_COLORS[cat] || PALETTE[palIdx++ % PALETTE.length];
+    return catColorMap[cat];
+  }
+
+  let allRows = [];
+  let filteredRows = [];
+  let currentPage = 1;
+  const PAGE_SIZE = 20;
+  let sortCol = 'created_at';
+  let sortDir = 'desc';
+  let pieChart, trendChart;
+
+  // ===== SUPABASE =====
+  const client = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+
+  async function loadAll() {
+    document.getElementById('tableWrap').innerHTML = '<div class="loading"><div class="spinner"></div>Đang tải toàn bộ lịch sử...</div>';
+    let allData = [];
+    let from = 0;
+    const CHUNK = 1000;
+    while (true) {
+      const { data, error } = await client
+        .from('questions')
+        .select('id, created_at, question, answer, category')
+        .order('created_at', { ascending: false })
+        .range(from, from + CHUNK - 1);
+      if (error) { showToast('Lỗi tải dữ liệu: ' + error.message); break; }
+      if (!data || data.length === 0) break;
+      allData = allData.concat(data);
+      if (data.length < CHUNK) break;
+      from += CHUNK;
+    }
+    allRows = allData;
+    populateCatFilter();
+    applyFilter();
+    renderStats();
+    renderTrend();
+  }
+
+  // ===== FILTER =====
+  function populateCatFilter() {
+    const cats = [...new Set(allRows.map(r => r.category || 'Khác'))].sort();
+    const sel = document.getElementById('fCat');
+    sel.innerHTML = '<option value="">Tất cả ngành</option>';
+    cats.forEach(c => {
+      const o = document.createElement('option');
+      o.value = c; o.textContent = c;
+      sel.appendChild(o);
+    });
+  }
+
+  function applyFilter() {
+    const from = document.getElementById('fFrom').value;
+    const to = document.getElementById('fTo').value;
+    const cat = document.getElementById('fCat').value;
+    const search = document.getElementById('fSearch').value.toLowerCase().trim();
+
+    filteredRows = allRows.filter(r => {
+      const d = r.created_at ? r.created_at.slice(0, 10) : '';
+      if (from && d < from) return false;
+      if (to && d > to) return false;
+      if (cat && (r.category || 'Khác') !== cat) return false;
+      if (search) {
+        const q = (r.question || '').toLowerCase();
+        const a = (r.answer || '').toLowerCase();
+        if (!q.includes(search) && !a.includes(search)) return false;
+      }
+      return true;
+    });
+
+    sortRows();
+    currentPage = 1;
+    renderTable();
+    renderPie();
+    document.getElementById('tableCount').textContent = filteredRows.length + ' kết quả';
+    document.getElementById('pieLabel').textContent = cat || 'Tất cả';
+  }
+
+  function sortRows() {
+    filteredRows.sort((a, b) => {
+      let va = a[sortCol] || '';
+      let vb = b[sortCol] || '';
+      if (sortCol === 'created_at') {
+        va = new Date(va); vb = new Date(vb);
+      } else {
+        va = String(va).toLowerCase(); vb = String(vb).toLowerCase();
+      }
+      if (va < vb) return sortDir === 'asc' ? -1 : 1;
+      if (va > vb) return sortDir === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }
+
+  // ===== STATS =====
+  function renderStats() {
+    const now = new Date();
+    const todayStr = now.toISOString().slice(0, 10);
+    const weekAgo = new Date(now - 7 * 86400000).toISOString().slice(0, 10);
+    const todayCount = allRows.filter(r => (r.created_at || '').slice(0, 10) === todayStr).length;
+    const weekCount = allRows.filter(r => (r.created_at || '').slice(0, 10) >= weekAgo).length;
+    const cats = {};
+    allRows.forEach(r => { const c = r.category || 'Khác'; cats[c] = (cats[c] || 0) + 1; });
+    const topCat = Object.entries(cats).sort((a, b) => b[1] - a[1])[0];
+    document.getElementById('sTotal').textContent = allRows.length;
+    document.getElementById('sToday').textContent = todayCount;
+    document.getElementById('sWeek').textContent = weekCount;
+    document.getElementById('sCats').textContent = Object.keys(cats).length;
+    document.getElementById('sTop').textContent = topCat ? topCat[0] : '—';
+  }
+
+  // ===== TREND CHART =====
+  function renderTrend() {
+    const days = [];
+    const counts = {};
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(Date.now() - i * 86400000).toISOString().slice(0, 10);
+      days.push(d);
+      counts[d] = 0;
+    }
+    allRows.forEach(r => {
+      const d = (r.created_at || '').slice(0, 10);
+      if (counts[d] !== undefined) counts[d]++;
+    });
+
+    const ctx = document.getElementById('trendChart').getContext('2d');
+    if (trendChart) trendChart.destroy();
+    trendChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: days.map(d => {
+          const [y, m, day] = d.split('-');
+          return `${day}/${m}`;
+        }),
+        datasets: [{
+          data: days.map(d => counts[d]),
+          borderColor: '#2563EB',
+          backgroundColor: 'rgba(37,99,235,0.08)',
+          fill: true,
+          tension: 0.4,
+          pointBackgroundColor: '#2563EB',
+          pointRadius: 5,
+          borderWidth: 2.5
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => `${c.raw} câu hỏi` } } },
+        scales: {
+          x: { ticks: { color: '#94A3B8', font: { family: 'Manrope' } }, grid: { display: false } },
+          y: { beginAtZero: true, ticks: { precision: 0, color: '#94A3B8', font: { family: 'Manrope' } }, grid: { color: 'rgba(148,163,184,0.07)' } }
+        }
+      }
+    });
+  }
+
+  // ===== PIE CHART =====
+  function renderPie() {
+    const cats = {};
+    filteredRows.forEach(r => { const c = r.category || 'Khác'; cats[c] = (cats[c] || 0) + 1; });
+    const entries = Object.entries(cats).sort((a, b) => b[1] - a[1]);
+
+    const ctx = document.getElementById('pieChart').getContext('2d');
+    if (pieChart) pieChart.destroy();
+    if (!entries.length) return;
+
+    pieChart = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: entries.map(e => e[0]),
+        datasets: [{ data: entries.map(e => e[1]), backgroundColor: entries.map(e => colorFor(e[0])), borderWidth: 2, borderColor: '#fff' }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => `${c.label}: ${c.raw} câu (${Math.round(c.raw / filteredRows.length * 100)}%)` } } },
+        cutout: '60%'
+      }
+    });
+
+    const legend = document.getElementById('legendList');
+    legend.innerHTML = entries.map(([cat, count]) => `
+      <div style="display:flex;align-items:center;gap:10px;font-size:13px;">
+        <div style="width:12px;height:12px;border-radius:3px;background:${colorFor(cat)};flex-shrink:0"></div>
+        <span style="flex:1;font-weight:600;color:var(--text-main);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(cat)}</span>
+        <span style="font-weight:800;color:var(--text-muted)">${count}</span>
+      </div>
+    `).join('');
+  }
+
+  // ===== TABLE =====
+  function renderTable() {
+    const wrap = document.getElementById('tableWrap');
+    if (!filteredRows.length) {
+      wrap.innerHTML = '<div class="loading" style="color:var(--text-muted)">Không có dữ liệu phù hợp</div>';
+      document.getElementById('pagination').innerHTML = '';
+      return;
+    }
+
+    const total = filteredRows.length;
+    const totalPages = Math.ceil(total / PAGE_SIZE);
+    if (currentPage > totalPages) currentPage = totalPages;
+    const start = (currentPage - 1) * PAGE_SIZE;
+    const pageRows = filteredRows.slice(start, start + PAGE_SIZE);
+
+    const thStyle = (col) => {
+      const cls = sortCol === col ? (sortDir === 'asc' ? 'sort-asc' : 'sort-desc') : '';
+      return `class="${cls}" data-col="${col}"`;
+    };
+
+    wrap.innerHTML = `
+      <table>
+        <thead>
+          <tr>
+            <th ${thStyle('id')} style="width:60px">#</th>
+            <th ${thStyle('created_at')} style="width:130px">Thời gian</th>
+            <th ${thStyle('category')} style="width:160px">Ngành</th>
+            <th ${thStyle('question')}>Câu hỏi</th>
+            <th>Câu trả lời</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${pageRows.map((r, i) => {
+            const time = r.created_at ? new Date(r.created_at).toLocaleString('vi-VN', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '';
+            const cat = r.category || 'Khác';
+            return `<tr>
+              <td style="color:var(--text-muted);font-size:12px">${start + i + 1}</td>
+              <td style="font-size:12px;white-space:nowrap;color:var(--accent-2)">${time}</td>
+              <td><span class="tag" style="background:${colorFor(cat)}">${escHtml(cat)}</span></td>
+              <td class="td-question">${escHtml(r.question || '')}</td>
+              <td class="td-answer">${escHtml((r.answer || '').substring(0, 120))}${(r.answer || '').length > 120 ? '...' : ''}</td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    `;
+
+    wrap.querySelectorAll('thead th[data-col]').forEach(th => {
+      th.addEventListener('click', () => {
+        const col = th.dataset.col;
+        if (sortCol === col) sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+        else { sortCol = col; sortDir = 'asc'; }
+        sortRows();
+        renderTable();
+      });
+    });
+
+    renderPagination(totalPages);
+  }
+
+  function renderPagination(totalPages) {
+    const pag = document.getElementById('pagination');
+    const start = (currentPage - 1) * PAGE_SIZE + 1;
+    const end = Math.min(currentPage * PAGE_SIZE, filteredRows.length);
+
+    let pages = '';
+    const range = 2;
+    for (let p = 1; p <= totalPages; p++) {
+      if (p === 1 || p === totalPages || (p >= currentPage - range && p <= currentPage + range)) {
+        pages += `<button class="page-btn ${p === currentPage ? 'active' : ''}" data-p="${p}">${p}</button>`;
+      } else if (p === currentPage - range - 1 || p === currentPage + range + 1) {
+        pages += `<span style="padding:0 4px;color:var(--text-muted)">…</span>`;
+      }
+    }
+
+    pag.innerHTML = `
+      <span class="pagination-info">Hiển thị ${start}–${end} / ${filteredRows.length}</span>
+      <div class="page-btns">
+        <button class="page-btn" id="prevBtn" ${currentPage === 1 ? 'disabled' : ''}>‹</button>
+        ${pages}
+        <button class="page-btn" id="nextBtn" ${currentPage === totalPages ? 'disabled' : ''}>›</button>
+      </div>
+    `;
+
+    pag.querySelectorAll('[data-p]').forEach(btn => {
+      btn.addEventListener('click', () => { currentPage = parseInt(btn.dataset.p); renderTable(); });
+    });
+    pag.querySelector('#prevBtn')?.addEventListener('click', () => { if (currentPage > 1) { currentPage--; renderTable(); } });
+    pag.querySelector('#nextBtn')?.addEventListener('click', () => { if (currentPage < totalPages) { currentPage++; renderTable(); } });
+  }
+
+  // ===== EXCEL EXPORT =====
+  function exportExcel() {
+    if (!filteredRows.length) { showToast('Không có dữ liệu để xuất'); return; }
+    const wsData = [['STT', 'Thời gian', 'Ngành', 'Câu hỏi', 'Câu trả lời']];
+    filteredRows.forEach((r, i) => {
+      const time = r.created_at ? new Date(r.created_at).toLocaleString('vi-VN') : '';
+      wsData.push([i + 1, time, r.category || 'Khác', r.question || '', r.answer || '']);
+    });
+
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+    ws['!cols'] = [{ wch: 6 }, { wch: 20 }, { wch: 28 }, { wch: 55 }, { wch: 70 }];
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Lịch sử câu hỏi');
+
+    const statData = [
+      ['Thống kê', ''],
+      ['Tổng câu hỏi', allRows.length],
+      ['Kết quả lọc', filteredRows.length],
+      ['Ngày xuất', new Date().toLocaleString('vi-VN')],
+      ['', ''],
+      ['Ngành', 'Số câu hỏi']
+    ];
+    const cats = {};
+    filteredRows.forEach(r => { const c = r.category || 'Khác'; cats[c] = (cats[c] || 0) + 1; });
+    Object.entries(cats).sort((a, b) => b[1] - a[1]).forEach(([c, n]) => statData.push([c, n]));
+
+    const ws2 = XLSX.utils.aoa_to_sheet(statData);
+    ws2['!cols'] = [{ wch: 35 }, { wch: 15 }];
+    XLSX.utils.book_append_sheet(wb, ws2, 'Thống kê');
+
+    const now = new Date();
+    const fname = `AI_Kiosk_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}.xlsx`;
+    XLSX.writeFile(wb, fname);
+    showToast('Đã xuất ' + fname);
+  }
+
+  // ===== TOAST =====
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  function escHtml(s) {
+    return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+
+  // ===== DEFAULT DATE RANGE (30 ngày) =====
+  function setDefaultDates() {
+    const now = new Date();
+    const to = now.toISOString().slice(0, 10);
+    const from30 = new Date(now - 30 * 86400000).toISOString().slice(0, 10);
+    document.getElementById('fTo').value = to;
+    document.getElementById('fFrom').value = from30;
+  }
+
+  // ===== EVENTS =====
+  document.getElementById('btnFilter').addEventListener('click', applyFilter);
+  document.getElementById('btnReset').addEventListener('click', () => {
+    setDefaultDates();
+    document.getElementById('fCat').value = '';
+    document.getElementById('fSearch').value = '';
+    applyFilter();
+  });
+  document.getElementById('btnRefresh').addEventListener('click', loadAll);
+  document.getElementById('btnExcel').addEventListener('click', exportExcel);
+
+  document.getElementById('fSearch').addEventListener('keydown', e => { if (e.key === 'Enter') applyFilter(); });
+
+  // ===== INIT =====
+  setDefaultDates();
+  loadAll();
+})();
+</script>
+</body>
+</html>

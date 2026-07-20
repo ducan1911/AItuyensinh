@@ -35,8 +35,11 @@ FILE .env MẪU (tạo tay, đừng commit lên git):
 import os
 import time
 import uuid
+import json
 import logging
+import threading
 import requests
+import websocket
 from flask import Flask, request, jsonify
 from dotenv import load_dotenv
 
@@ -213,7 +216,12 @@ def chat_completions():
             question = m.get("content", "")
             break
 
-    if not question:
+    question_lower = question.lower()
+    # Bộ lọc chống nhiễu STT từ xiaozhi.me (nhận nhầm âm thanh thành YouTube, TikTok, La La School, v.v.)
+    if any(kw in question_lower for kw in ["la la school", "youtube", "tiktok", "đăng ký kênh", "dang ky kenh"]):
+        answer = "Xin lỗi, mình không nghe rõ?"
+        category = "Khác"
+    elif not question:
         answer = "Mình chưa nghe rõ câu hỏi, bạn hỏi lại giúp mình nhé."
         category = "Khác"
     else:
@@ -236,7 +244,87 @@ def chat_completions():
     })
 
 
+XIAOZHI_MCP_WSS = os.environ.get("XIAOZHI_MCP_WSS", "")
+
+
+def _on_mcp_message(ws, raw):
+    try:
+        data = json.loads(raw)
+        method = data.get("method", "")
+        if method != "tools/call":
+            return
+        params = data.get("params", {})
+        args = params.get("arguments", {})
+        question = args.get("question", "").strip()
+        answer = args.get("answer", "").strip()
+        if not question:
+            return
+        category = classify_category(question, answer)
+        log_to_supabase(question, answer, category)
+        log.info("[MCP-WS] logged: category=%s | q=%s", category, question[:60])
+        result_msg = {
+            "jsonrpc": "2.0",
+            "id": data.get("id"),
+            "result": {"content": [{"type": "text", "text": f"Đã ghi: {category}"}]}
+        }
+        ws.send(json.dumps(result_msg))
+    except Exception as e:
+        log.warning("[MCP-WS] parse error: %s", e)
+
+
+def _on_mcp_open(ws):
+    log.info("[MCP-WS] Kết nối xiaozhi.me MCP thành công")
+    ws.send(json.dumps({
+        "jsonrpc": "2.0", "id": 1,
+        "method": "initialize",
+        "params": {
+            "protocolVersion": "2024-11-05",
+            "capabilities": {"tools": {}},
+            "clientInfo": {"name": "aituyensinh-bridge", "version": "1.0"}
+        }
+    }))
+    ws.send(json.dumps({
+        "jsonrpc": "2.0",
+        "method": "notifications/initialized",
+        "params": {}
+    }))
+
+
+def _on_mcp_error(ws, err):
+    log.warning("[MCP-WS] Lỗi: %s", err)
+
+
+def _on_mcp_close(ws, code, msg):
+    log.warning("[MCP-WS] Mất kết nối (code=%s), thử lại sau 30s...", code)
+
+
+def start_mcp_listener():
+    if not XIAOZHI_MCP_WSS:
+        log.warning("[MCP-WS] XIAOZHI_MCP_WSS chưa cấu hình, bỏ qua listener.")
+        return
+
+    def _run():
+        while True:
+            try:
+                ws = websocket.WebSocketApp(
+                    XIAOZHI_MCP_WSS,
+                    on_open=_on_mcp_open,
+                    on_message=_on_mcp_message,
+                    on_error=_on_mcp_error,
+                    on_close=_on_mcp_close,
+                )
+                ws.run_forever(ping_interval=30, ping_timeout=10)
+            except Exception as e:
+                log.error("[MCP-WS] Exception: %s", e)
+            time.sleep(30)
+
+    t = threading.Thread(target=_run, daemon=True)
+    t.start()
+    log.info("[MCP-WS] Listener thread khởi động")
+
+
 if __name__ == "__main__":
+    start_mcp_listener()
     port = int(os.environ.get("PORT", 8080))
     log.info("Dify bridge đang chạy tại http://0.0.0.0:%d (endpoint: /v1/chat/completions)", port)
     app.run(host="0.0.0.0", port=port)

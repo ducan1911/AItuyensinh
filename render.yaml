@@ -5,3 +5,10 @@ services:
     buildCommand: "pip install -r requirements.txt"
     startCommand: "gunicorn dify_bridge:app"
     plan: free
+
+  - type: web
+    name: xiaozhi-custom-server
+    env: docker
+    dockerFilePath: xiaozhi-custom-server/Dockerfile
+    dockerContext: xiaozhi-custom-server
+    plan: free

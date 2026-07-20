@@ -10,6 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/wordcloud2.js/1.2.2/wordcloud2.min.js"></script>
 
   <script id="config">
     window.SUPABASE_URL = "https://vkhxkwlmbyivcedrgstz.supabase.co";
@@ -640,7 +641,7 @@
 
     .nganh-highlights {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       gap: 16px;
       margin-bottom: 28px;
     }
@@ -712,6 +713,65 @@
     .nc-salary { font-size: 14px; color: var(--amber); font-weight: 800; margin-bottom: 6px; }
     .nc-desc { font-size: 13px; color: var(--text-muted); line-height: 1.45; font-weight: 500; }
 
+    /* ===== WORD CLOUD BOX ===== */
+    .word-cloud-box {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 20px;
+      height: 100%;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    #wordCloudCanvas {
+      width: 100%;
+      height: 400px;
+    }
+
+    /* ===== SCREENSAVER ===== */
+    #screensaver {
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(15, 23, 42, 0.95);
+      z-index: 9999;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.8s;
+      backdrop-filter: blur(10px);
+    }
+    #screensaver.active { opacity: 1; pointer-events: auto; }
+    .ss-title { font-family: 'Kalam', cursive; font-size: 6vw; font-weight: 700; color: #fff; margin-bottom: 20px; text-shadow: 0 4px 20px rgba(37,99,235,0.5); }
+    .ss-sub { font-size: 2vw; color: #94A3B8; margin-bottom: 40px; }
+    .ss-qr { width: 300px; height: 300px; border-radius: 20px; border: 4px solid var(--accent); padding: 10px; background: #fff; }
+    .pulse-mic { margin-top: 40px; font-size: 40px; color: var(--accent); animation: pulseMic 1.5s infinite; }
+    @keyframes pulseMic { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(1.5); opacity: 0; } }
+
+    /* ===== STATUS OVERLAY (Đang nghe...) ===== */
+    #statusOverlay {
+      position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(140px);
+      background: #0F172A; color: #fff; padding: 16px 32px; border-radius: 999px;
+      font-weight: 700; font-size: 16px; display: flex; align-items: center; gap: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3); opacity: 0; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 8000; border: 1px solid rgba(255,255,255,0.1);
+    }
+    #statusOverlay.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+    .status-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); animation: blink 1s infinite alternate; }
+    @keyframes blink { 0% { opacity: 0.3; } 100% { opacity: 1; box-shadow: 0 0 10px var(--accent); } }
+
+    /* ===== WAVEFORM ===== */
+    #waveformBar {
+      position: fixed; bottom: 0; left: 0; width: 100%;
+      height: 80px;
+      z-index: 7999;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+    #waveformBar.show { opacity: 1; }
+    #waveformCanvas { width: 100%; height: 100%; }
+
     /* ===== QR CODE ===== */
     .qr-box {
       background: var(--surface);
@@ -767,6 +827,25 @@
 </head>
 
 <body>
+  <!-- STATUS OVERLAY -->
+  <div id="statusOverlay">
+    <div class="status-dot"></div>
+    <span id="statusText">Đang nghe...</span>
+  </div>
+
+  <!-- WAVEFORM BAR -->
+  <div id="waveformBar">
+    <canvas id="waveformCanvas"></canvas>
+  </div>
+
+  <!-- SCREENSAVER -->
+  <div id="screensaver">
+    <div class="ss-title">Xin chào! Nhấn nút để hỏi AI</div>
+    <div class="ss-sub">Hệ thống tư vấn tuyển sinh tự động thông minh</div>
+    <div class="ss-qr"><img src="QR.png" alt="QR" style="width:100%;height:100%;object-fit:cover;"></div>
+    <div class="pulse-mic">&#127908;</div>
+  </div>
+
   <div class="wrap">
 
     <!-- NAV -->
@@ -932,7 +1011,7 @@
       </div>
     </div>
 
-    <!-- NGANH GIOI THIEU -->
+    <!-- NGANH GIOI THIEU & WORD CLOUD -->
     <div class="nganh-section">
       <div class="nganh-split">
         <!-- QTCSDL -->
@@ -940,65 +1019,20 @@
           <div class="nganh-hero-text">
             <span class="ma-nganh">Mã ngành: 5480208</span>
             <h2>Quản trị Cơ sở dữ liệu</h2>
-            <p>Ngành học giúp bạn trở thành người quản lý, bảo mật và phân tích dữ liệu — "tài sản quý giá nhất" của mọi doanh nghiệp. Chính hệ thống đang chạy hiện tại là một ví dụ về sản phẩm của ngành này!</p>
+            <p>Ngành học giúp bạn trở thành người quản lý, bảo mật và phân tích dữ liệu — "tài sản quý giá nhất" của mọi doanh nghiệp.</p>
           </div>
-          <div class="nganh-highlights">
+          <div class="nganh-highlights" style="margin-bottom: 0;">
             <div class="hl-box"><div class="hl-num" style="color:var(--cyan)">100%</div><div class="hl-label">Miễn học phí (THCS)</div></div>
-            <div class="hl-box"><div class="hl-num" style="color:var(--amber)">70%</div><div class="hl-label">Thời lượng thực hành</div></div>
+            <div class="hl-box"><div class="hl-num" style="color:var(--amber)">70%</div><div class="hl-label">Thực hành</div></div>
             <div class="hl-box"><div class="hl-num" style="color:var(--accent-2)">1.5-2</div><div class="hl-label">Năm đào tạo</div></div>
             <div class="hl-box"><div class="hl-num" style="color:var(--violet)">100+</div><div class="hl-label">Doanh nghiệp đối tác</div></div>
           </div>
-          <div class="nganh-cards">
-            <div class="nganh-card">
-              <div class="nc-icon">&#128187;</div>
-              <div class="nc-body">
-                <div class="nc-title">Quản trị viên CSDL (DBA)</div>
-                <div class="nc-salary">8 - 25 triệu/tháng</div>
-                <div class="nc-desc">Thiết kế, quản trị, sao lưu và bảo mật hệ thống cơ sở dữ liệu cho doanh nghiệp.</div>
-              </div>
-            </div>
-            <div class="nganh-card">
-              <div class="nc-icon">&#128200;</div>
-              <div class="nc-body">
-                <div class="nc-title">Data Analyst / Engineer</div>
-                <div class="nc-salary">10 - 30 triệu/tháng</div>
-                <div class="nc-desc">Khai thác dữ liệu để đưa ra báo cáo, dự đoán xu hướng — ngành cực "hot".</div>
-              </div>
-            </div>
-          </div>
         </div>
 
-        <!-- CNTT -->
-        <div class="nganh-hero cntt">
-          <div class="nganh-hero-text">
-            <span class="ma-nganh">Mã ngành: 5480201</span>
-            <h2>Công nghệ thông tin</h2>
-            <p>Ngành đào tạo toàn diện về phần cứng, mạng máy tính và phần mềm. Bạn sẽ làm chủ kỹ thuật lắp ráp, sửa chữa, quản trị mạng LAN/WAN và lập trình phần mềm ứng dụng cơ bản.</p>
-          </div>
-          <div class="nganh-highlights">
-            <div class="hl-box"><div class="hl-num" style="color:var(--green-2)">100%</div><div class="hl-label">Miễn học phí (THCS)</div></div>
-            <div class="hl-box"><div class="hl-num" style="color:var(--amber)">70%</div><div class="hl-label">Thời lượng thực hành</div></div>
-            <div class="hl-box"><div class="hl-num" style="color:var(--green-2)">1.5-2</div><div class="hl-label">Năm đào tạo</div></div>
-            <div class="hl-box"><div class="hl-num" style="color:var(--rose)">100+</div><div class="hl-label">Doanh nghiệp đối tác</div></div>
-          </div>
-          <div class="nganh-cards">
-            <div class="nganh-card">
-              <div class="nc-icon">&#128295;</div>
-              <div class="nc-body">
-                <div class="nc-title">Kỹ thuật viên IT / Helpdesk</div>
-                <div class="nc-salary">8 - 15 triệu/tháng</div>
-                <div class="nc-desc">Hỗ trợ kỹ thuật, cài đặt, sửa chữa phần cứng/phần mềm tại các công ty, trường học.</div>
-              </div>
-            </div>
-            <div class="nganh-card">
-              <div class="nc-icon">&#128423;</div>
-              <div class="nc-body">
-                <div class="nc-title">Quản trị Mạng / System Admin</div>
-                <div class="nc-salary">10 - 25 triệu/tháng</div>
-                <div class="nc-desc">Thiết lập, quản trị và bảo mật hệ thống mạng, server cho tổ chức.</div>
-              </div>
-            </div>
-          </div>
+        <!-- WORD CLOUD -->
+        <div class="word-cloud-box">
+          <h2 style="font-weight: 800; font-size: 18px; margin-bottom: 12px; color: var(--text-main);">Từ khoá được hỏi nhiều nhất</h2>
+          <canvas id="wordCloudCanvas"></canvas>
         </div>
       </div>
     </div>
@@ -1022,9 +1056,21 @@
   <script>
     (function () {
       const PALETTE = ['#3B82F6','#F43F5E','#22D3EE','#10B981','#A78BFA','#F59E0B','#FB923C','#EC4899'];
+      const CAT_COLORS = {
+        'Quản trị Cơ sở dữ liệu': '#2563EB',
+        'Khoa học Máy tính / Lập trình': '#10B981',
+        'An toàn thông tin': '#7C3AED',
+        'Kinh tế - Quản trị Kinh doanh': '#F59E0B',
+        'Ngôn ngữ - Xã hội Nhân văn': '#EC4899',
+        'Học phí - Học bổng': '#0891B2',
+        'Khác': '#64748B'
+      };
       const colorFor = (() => {
         const map = {}; let i = 0;
-        return (cat) => { if (!(cat in map)) { map[cat] = PALETTE[i % PALETTE.length]; i++; } return map[cat]; };
+        return (cat) => {
+          if (!(cat in map)) { map[cat] = CAT_COLORS[cat] || PALETTE[i % PALETTE.length]; i++; }
+          return map[cat];
+        };
       })();
 
       const statTotal = document.getElementById('statTotal');
@@ -1037,11 +1083,131 @@
       const connStatusEl = document.getElementById('connStatus');
       const dbTableBody = document.getElementById('dbTableBody');
       const sqlResultEl = document.getElementById('sqlResult');
+      const screensaver = document.getElementById('screensaver');
+      const statusOverlay = document.getElementById('statusOverlay');
+      const statusText = document.getElementById('statusText');
 
       let counts = {};
       let rows = [];
       let chart;
+      let wordCloudInstance = null;
+      let ssTimer = null;
+      let glowTimeout = null;
 
+      // ===== SCREENSAVER =====
+      const SS_DELAY = 60000;
+
+      function resetScreensaverTimer() {
+        clearTimeout(ssTimer);
+        hideScreensaver();
+        ssTimer = setTimeout(showScreensaver, SS_DELAY);
+      }
+
+      function showScreensaver() {
+        screensaver.classList.add('active');
+      }
+
+      function hideScreensaver() {
+        screensaver.classList.remove('active');
+      }
+
+      screensaver.addEventListener('click', () => {
+        resetScreensaverTimer();
+      });
+
+      document.addEventListener('mousemove', resetScreensaverTimer);
+      document.addEventListener('keydown', resetScreensaverTimer);
+      document.addEventListener('touchstart', resetScreensaverTimer);
+
+      resetScreensaverTimer();
+
+      // ===== GLOW MAU THEO NGANH =====
+      function applyGlow(cat) {
+        const color = colorFor(cat);
+        document.documentElement.style.setProperty('--accent', color);
+        document.documentElement.style.setProperty('--glow', `${color}33`);
+        clearTimeout(glowTimeout);
+        glowTimeout = setTimeout(() => {
+          document.documentElement.style.setProperty('--accent', '#2563EB');
+          document.documentElement.style.setProperty('--glow', 'rgba(37, 99, 235, 0.15)');
+        }, 5000);
+      }
+
+      // ===== STATUS OVERLAY =====
+      function showStatus(msg) {
+        statusText.textContent = msg;
+        statusOverlay.classList.add('show');
+        if (msg.includes('nghe')) startWaveform();
+        else stopWaveform();
+      }
+
+      function hideStatus() {
+        statusOverlay.classList.remove('show');
+        stopWaveform();
+      }
+
+      // ===== WAVEFORM =====
+      const waveformBar = document.getElementById('waveformBar');
+      const waveformCanvas = document.getElementById('waveformCanvas');
+      let waveformCtx = null;
+      let waveformRaf = null;
+      let waveformActive = false;
+      let waveformPoints = [];
+
+      function initWaveform() {
+        waveformCtx = waveformCanvas.getContext('2d');
+        resizeWaveform();
+        window.addEventListener('resize', resizeWaveform);
+      }
+
+      function resizeWaveform() {
+        waveformCanvas.width = waveformCanvas.offsetWidth;
+        waveformCanvas.height = waveformCanvas.offsetHeight;
+        waveformPoints = new Array(Math.floor(waveformCanvas.width / 4)).fill(0);
+      }
+
+      function startWaveform() {
+        waveformActive = true;
+        waveformBar.classList.add('show');
+        if (!waveformRaf) animateWaveform();
+      }
+
+      function stopWaveform() {
+        waveformActive = false;
+        waveformBar.classList.remove('show');
+        cancelAnimationFrame(waveformRaf);
+        waveformRaf = null;
+      }
+
+      function animateWaveform() {
+        const w = waveformCanvas.width;
+        const h = waveformCanvas.height;
+        const ctx = waveformCtx;
+        ctx.clearRect(0, 0, w, h);
+
+        waveformPoints.shift();
+        const amp = waveformActive ? (Math.random() * 0.7 + 0.1) : 0;
+        waveformPoints.push(amp);
+
+        const barW = 3;
+        const gap = 1;
+        const step = barW + gap;
+        const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#2563EB';
+
+        ctx.fillStyle = accent + 'CC';
+        for (let i = 0; i < waveformPoints.length; i++) {
+          const barH = waveformPoints[i] * h * 0.85;
+          const x = i * step;
+          const y = (h - barH) / 2;
+          ctx.beginPath();
+          ctx.roundRect(x, y, barW, barH, 2);
+          ctx.fill();
+        }
+
+        waveformRaf = requestAnimationFrame(animateWaveform);
+      }
+
+      // ===== CHART =====
       function initChart() {
         const ctx = document.getElementById('chart').getContext('2d');
         chart = new Chart(ctx, {
@@ -1057,7 +1223,7 @@
             },
             scales: {
               x: { beginAtZero: true, ticks: { color: '#94A3B8', precision: 0, font: { family: 'Manrope' } }, grid: { color: 'rgba(148,163,184,0.06)' } },
-              y: { ticks: { color: '#F1F5F9', font: { family: 'Manrope', weight: 600, size: 12 } }, grid: { display: false } }
+              y: { ticks: { color: '#334155', font: { family: 'Manrope', weight: '600', size: 12 } }, grid: { display: false } }
             }
           }
         });
@@ -1118,12 +1284,12 @@
       }
 
       function renderDbTable() {
-        if (!rows.length) { dbTableBody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted)">Dang cho du lieu...</td></tr>'; return; }
+        if (!rows.length) { dbTableBody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-muted)">Đang chờ dữ liệu...</td></tr>'; return; }
         dbTableBody.innerHTML = rows.slice(0, 8).map((r, i) => {
           const id = String(rows.length - i).padStart(3, '0');
           const time = new Date(r.created_at).toLocaleTimeString('vi-VN', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
           return `<tr class="${i === 0 ? 'new-row' : ''}">
-            <td style="color:var(--muted)">${id}</td>
+            <td style="color:var(--text-muted)">${id}</td>
             <td style="color:var(--accent-2)">${time}</td>
             <td>${escapeHtml((r.question||'').substring(0,45))}${(r.question||'').length>45?'...':''}</td>
             <td><span class="tag" style="background:${colorFor(r.category)};font-size:9px">${escapeHtml(r.category)}</span></td>
@@ -1139,26 +1305,79 @@
         ).join('\n');
       }
 
+      // ===== WORD CLOUD =====
+      const STOP_WORDS = new Set(['có','không','gì','như','là','và','của','cho','thế','bao','được','khi','nào',
+        'nhiêu','ở','với','để','hay','ra','làm','học','trường','ngành','tôi','mình','thì','về','một','các',
+        'đó','này','đây','sẽ','cũng','vào','từ','theo','hơn','được','bị','nên','đã','đang','rất','tất','cả']);
+
+      function extractWords(rowList) {
+        const freq = {};
+        rowList.forEach(r => {
+          const text = (r.question || '') + ' ' + (r.answer || '');
+          text.toLowerCase()
+            .replace(/[^a-zàáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ\s]/g, ' ')
+            .split(/\s+/)
+            .filter(w => w.length > 2 && !STOP_WORDS.has(w))
+            .forEach(w => { freq[w] = (freq[w] || 0) + 1; });
+        });
+        return Object.entries(freq)
+          .filter(([, v]) => v >= 1)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 60)
+          .map(([word, count]) => [word, Math.max(14, Math.min(60, count * 8))]);
+      }
+
+      function renderWordCloud() {
+        const canvas = document.getElementById('wordCloudCanvas');
+        if (!canvas || typeof WordCloud === 'undefined') return;
+        const words = extractWords(rows);
+        if (!words.length) return;
+        WordCloud(canvas, {
+          list: words,
+          gridSize: 10,
+          weightFactor: 1,
+          fontFamily: 'Manrope, sans-serif',
+          color: (word, weight) => {
+            const colors = ['#2563EB','#10B981','#7C3AED','#F59E0B','#EC4899','#0891B2','#F43F5E'];
+            return colors[Math.floor(Math.random() * colors.length)];
+          },
+          rotateRatio: 0.3,
+          backgroundColor: 'transparent',
+          drawOutOfBound: false,
+          shrinkToFit: true
+        });
+      }
+
       function escapeHtml(s) {
         return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
       }
 
-      function renderAll() { renderChart(); renderRank(); renderFeed(); renderStats(); renderDbTable(); renderSqlResult(); }
+      function renderAll() {
+        renderChart();
+        renderRank();
+        renderFeed();
+        renderStats();
+        renderDbTable();
+        renderSqlResult();
+        renderWordCloud();
+      }
 
       function playNotificationSound() {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const oscillator = audioCtx.createOscillator();
-        const gainNode = audioCtx.createGain();
-        oscillator.connect(gainNode);
-        gainNode.connect(audioCtx.destination);
-        oscillator.type = 'sine';
-        oscillator.frequency.setValueAtTime(880, audioCtx.currentTime); // Note A5
-        oscillator.frequency.exponentialRampToValueAtTime(1100, audioCtx.currentTime + 0.1);
-        gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
-        gainNode.gain.linearRampToValueAtTime(0.1, audioCtx.currentTime + 0.05);
-        gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
-        oscillator.start(audioCtx.currentTime);
-        oscillator.stop(audioCtx.currentTime + 0.5);
+        try {
+          const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          const oscillator = audioCtx.createOscillator();
+          const gainNode = audioCtx.createGain();
+          oscillator.connect(gainNode);
+          gainNode.connect(audioCtx.destination);
+          oscillator.type = 'sine';
+          oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
+          oscillator.frequency.exponentialRampToValueAtTime(1100, audioCtx.currentTime + 0.1);
+          gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+          gainNode.gain.linearRampToValueAtTime(0.1, audioCtx.currentTime + 0.05);
+          gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+          oscillator.start(audioCtx.currentTime);
+          oscillator.stop(audioCtx.currentTime + 0.5);
+        } catch(e) {}
       }
 
       function addRow(row, prepend, isInitialLoad = false) {
@@ -1166,10 +1385,13 @@
         counts[cat] = (counts[cat] || 0) + 1;
         if (prepend) rows.unshift(row); else rows.push(row);
         renderAll();
-        
+
         if (!isInitialLoad) {
           playNotificationSound();
-          // Auto scroll
+          applyGlow(cat);
+          hideScreensaver();
+          resetScreensaverTimer();
+          hideStatus();
           setTimeout(() => {
             const feedContainer = document.getElementById('feed');
             const dbTableWrapper = document.getElementById('dbTableWrapper');
@@ -1184,10 +1406,7 @@
         connText.textContent = text;
       }
 
-      // Skills visualization
-      function renderSkills() {}
-
-      // DEMO MODE
+      // ===== DEMO MODE =====
       function runDemoMode() {
         setConn(false, 'Demo — chưa kết nối Supabase');
         const demoCats = [
@@ -1200,10 +1419,13 @@
           { q: 'Ngành An toàn thông tin có khó xin việc không?', a: 'Ngược lại luôn — ngành này đang thiếu người trầm trọng, doanh nghiệp giành nhau tuyển!' },
           { q: 'Trường có học bổng cho học sinh giỏi không?', a: 'Có chứ! Học bổng tuyển thẳng 100% cho HS giỏi cấp tỉnh, 50% cho điểm TN cao!' },
           { q: 'Học Quản trị CSDL có được thực hành nhiều không?', a: '70% thời lượng là thực hành — bạn sẽ làm việc trực tiếp với database thật, SQL thật, dữ liệu thật!' },
-          { q: 'Tốt nghiệp có được giới thiệu việc làm không?', a: 'Trường liên kết với hơn 100 doanh nghiệp, cam kết giới thiệu việc làm ngay sau tốt nghiệp!' }
+          { q: 'Tốt nghiệp có được giới thiệu việc làm không?', a: 'Trường liên kết với hơn 100 doanh nghiệp, cam kết giới thiệu việc làm ngay sau tốt nghiệp!' },
+          { q: 'Điểm chuẩn ngành CNTT là bao nhiêu?', a: 'Trường tuyển sinh theo hình thức xét hồ sơ, không có điểm chuẩn cứng — cơ hội cho tất cả mọi người!' },
+          { q: 'Học ngành Kế toán có triển vọng không?', a: 'Kế toán luôn là ngành thiết yếu, mọi doanh nghiệp đều cần — cơ hội việc làm rất ổn định!' }
         ];
+
         let seed = [];
-        for (let i = 0; i < 12; i++) {
+        for (let i = 0; i < 14; i++) {
           const item = demoQ[Math.floor(Math.random() * demoQ.length)];
           seed.push({
             created_at: new Date(Date.now() - i * 75000).toISOString(),
@@ -1212,17 +1434,27 @@
           });
         }
         seed.reverse().forEach(r => addRow(r, true, true));
+
+        let demoPhase = 0;
         setInterval(() => {
-          const item = demoQ[Math.floor(Math.random() * demoQ.length)];
-          addRow({
-            created_at: new Date().toISOString(),
-            category: demoCats[Math.floor(Math.random() * demoCats.length)],
-            question: item.q, answer: item.a
-          }, true, false);
-        }, 6000);
+          demoPhase++;
+          if (demoPhase % 3 === 1) {
+            showStatus('🎙 Đang nghe...');
+          } else if (demoPhase % 3 === 2) {
+            showStatus('🤖 Đang suy nghĩ...');
+          } else {
+            const item = demoQ[Math.floor(Math.random() * demoQ.length)];
+            addRow({
+              created_at: new Date().toISOString(),
+              category: demoCats[Math.floor(Math.random() * demoCats.length)],
+              question: item.q, answer: item.a
+            }, true, false);
+            demoPhase = 0;
+          }
+        }, 3500);
       }
 
-      // LIVE MODE
+      // ===== LIVE MODE =====
       async function runLiveMode() {
         const client = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
         setConn(false, 'Đang tải dữ liệu...');
@@ -1245,17 +1477,28 @@
         client
           .channel('questions-realtime')
           .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'questions' }, (payload) => {
+            hideStatus();
             addRow(payload.new, true, false);
           })
           .subscribe((status) => {
-            if (status === 'SUBSCRIBED') setConn(true, 'Da ket noi — realtime');
+            if (status === 'SUBSCRIBED') setConn(true, 'Đã kết nối — realtime');
             if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') setConn(false, 'Mất kết nối, đang thử lại...');
           });
+
+        client
+          .channel('status-broadcast')
+          .on('broadcast', { event: 'status' }, (payload) => {
+            if (payload.payload && payload.payload.msg) {
+              showStatus(payload.payload.msg);
+            }
+          })
+          .subscribe();
+
         setInterval(renderStats, 30000);
       }
 
       initChart();
-      renderSkills();
+      initWaveform();
       const isPlaceholder = window.SUPABASE_URL.includes('YOUR-PROJECT') || window.SUPABASE_ANON_KEY.includes('YOUR-ANON');
       if (isPlaceholder || typeof supabase === 'undefined') {
         runDemoMode();
