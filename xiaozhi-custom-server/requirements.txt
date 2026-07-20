@@ -1,4 +1,3 @@
-# Create requirements.txt for the new custom server
 flask
 requests
 python-dotenv
