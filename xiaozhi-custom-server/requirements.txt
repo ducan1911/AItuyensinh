@@ -7,3 +7,4 @@ websockets
 edge-tts
 pydub
 numpy
+opuslib_next
